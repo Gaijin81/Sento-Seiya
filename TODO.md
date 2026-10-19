@@ -9,7 +9,7 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 - [x] Ajouter le workflow CI de build et de vérification TypeScript.
 - [x] Documenter les règles de jeu initiales.
 - [x] Ajouter cette TODO centrale et la règle de conservation des branches.
-- [ ] Fusionner la PR du socle dans `main` après revue; conserver `feature/foundation-mvp`.
+- [x] Fusionner la PR du socle dans `main` après revue; conserver `feature/foundation-mvp`.
 
 ## Prochaine feature — moteur de combat tactique
 
@@ -20,7 +20,7 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 - [x] Ajouter un adversaire IA de base.
 - [x] Ajouter des tests unitaires déterministes pour les règles du moteur.
 - [x] Faire réussir les tests et le build dans GitHub Actions.
-- [ ] Créer une PR dédiée; ne pas mélanger cette feature aux autres.
+- [x] Créer une PR dédiée; ne pas mélanger cette feature aux autres.
 
 ## Interface de combat tactique — `feature/combat-ui`
 
@@ -113,9 +113,10 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 ## Progression et collection
 
 - [ ] Modèle de données des chevaliers, armures, techniques et raretés.
-- [ ] XP, niveaux, progression persistante et récompenses.
+- [x] XP, niveaux, progression persistante et récompenses.
 - [ ] Collection étendue (88 chevaliers), formation et positionnement d'équipe.
-- [ ] Inventaire, équipement, améliorations et ressources.
+- [x] Inventaire, équipement et ressources.
+- [ ] Améliorations d'objets (niveaux de forge).
 - [x] Sauvegarde locale versionnée et migration des données (v1 → v2).
 - [ ] Comptes et sauvegarde cloud multi-appareils.
 
@@ -143,12 +144,12 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 - [x] Ajouter `package-lock.json` pour figer les versions et permettre `npm audit`.
 - [x] Passer la CI sur Node.js 22 (Node.js 20 n'est plus maintenu et Vitest 5 exige Node.js 22.12+).
 - [x] Vérifier `npm audit` (0 vulnérabilité), tests et build.
-- [ ] Ajouter un contrôle `npm audit` automatique en CI.
+- [x] Ajouter un contrôle `npm audit` automatique en CI (échec sur vulnérabilité élevée ou critique).
 
 ## Qualité et livraison
 
-- [ ] Tests unitaires pour les règles métier.
-- [ ] Tests d'intégration des sauvegardes et des combats.
+- [x] Tests unitaires pour les règles métier.
+- [x] Tests d'intégration des sauvegardes et des combats.
 - [ ] Tests de parcours UI critiques.
 - [ ] Accessibilité clavier, contrastes et lecteurs d'écran.
 - [ ] Vérifier les performances sur smartphone et tablette.
