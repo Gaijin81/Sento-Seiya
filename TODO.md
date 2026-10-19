@@ -73,6 +73,14 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 - [ ] Matchmaking, salons, invitations et reconnexion.
 - [ ] Anti-triche et journal de combat serveur.
 
+## Sécurité des dépendances — `chore/deps-security`
+
+- [x] Corriger les 6 vulnérabilités signalées par `npm audit` (esbuild, vite, vite-node, @vitest/mocker, tinypool, vitest) : passage à Vite 8, Vitest 5 et @vitejs/plugin-react 6.
+- [x] Ajouter `package-lock.json` pour figer les versions et permettre `npm audit`.
+- [x] Passer la CI sur Node.js 22 (Node.js 20 n'est plus maintenu et Vitest 5 exige Node.js 22.12+).
+- [x] Vérifier `npm audit` (0 vulnérabilité), tests et build.
+- [ ] Ajouter un contrôle `npm audit` automatique en CI.
+
 ## Qualité et livraison
 
 - [ ] Tests unitaires pour les règles métier.

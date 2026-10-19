@@ -6,18 +6,19 @@ Prototype de jeu web tactique d'aventure inspiré de l'univers des chevaliers du
 
 ## Démarrage
 
-Prérequis : Node.js 20+ et Yarn.
+Prérequis : Node.js 22.12+ et npm (le fichier `package-lock.json` fige les versions des dépendances).
 
 ```bash
-yarn install
-yarn dev
+npm install
+npm run dev
 ```
 
 Créer une version de production et vérifier TypeScript :
 
 ```bash
-yarn build
-yarn preview
+npm test
+npm run build
+npm run preview
 ```
 
 ## Stack
