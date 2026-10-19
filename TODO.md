@@ -134,7 +134,8 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 
 ## Modes de jeu
 
-- [ ] PvE avec difficulté progressive et boss.
+- [x] PvE avec boss (chapitre 1) et 3 niveaux de difficulté (Facile, Normal, Difficile) appliqués aux adversaires de l'IA, réglables dans Options.
+- [ ] Difficulté progressive automatique selon le niveau de l'escouade.
 - [ ] Coop en ligne et synchronisation d'état.
 - [ ] PvP en ligne avec validation serveur des actions.
 - [ ] Matchmaking, salons, invitations et reconnexion.
