@@ -11,7 +11,7 @@ describe('codex', () => {
   it('starts with only the starter knights, forgeable items and the first place known', () => {
     const codex = buildCodex(createInitialProgression(), [createCampaign(CHAPTER_ONE), createCampaign(CHAPTER_TWO)])
     expect(section(codex, 'knights').entries.filter((entry) => entry.discovered).map((entry) => entry.id)).toEqual(['seiya', 'shiryu', 'hyoga'])
-    expect(section(codex, 'items').entries.filter((entry) => !entry.discovered).length).toBe(5)
+    expect(section(codex, 'items').entries.filter((entry) => !entry.discovered).length).toBe(7)
     expect(section(codex, 'places').entries.filter((entry) => entry.discovered).map((entry) => entry.id)).toEqual(['arrivee', 'c2-depart'])
     expect(section(codex, 'foes').entries.every((entry) => !entry.discovered)).toBe(true)
     expect(section(codex, 'chronicles').entries.every((entry) => !entry.discovered)).toBe(true)

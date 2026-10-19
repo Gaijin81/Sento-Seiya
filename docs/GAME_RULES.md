@@ -125,6 +125,7 @@ L'arène de démonstration oppose l'escouade du joueur (1 à 3 chevaliers) à de
 - Chaque chapitre a sa propre sauvegarde (`sento-seiya-campaign:<id>`) ; l'ancienne clé `sento-seiya-campaign` reste lue pour le chapitre 1.
 - Les identifiants de cases sont uniques entre chapitres (préfixe `c2-` pour le chapitre 2) : les récompenses déjà obtenues ne sont jamais redonnées.
 - Chapitre 2, « L'ombre du Phénix » : Ikki rejoint l'équipe en battant le Phénix masqué, ou sans combat si le joueur a médité à la source. Certains choix demandent Shun ou Hyoga dans l'escouade, ou 30 éclats de Cosmos.
+- Chapitre 3, « Les marches du Sanctuaire » (débloqué après le chapitre 2) : le gardien d'or de la Première Maison se combat, ou se laisse convaincre si le joueur s'est recueilli devant la flamme (accessible en aidant la jeune fille du village ou avec Ikki dans l'escouade). Shiryu et Shun ouvrent des bonus d'escouade.
 
 ## 6 quinquies ter. Codex
 
