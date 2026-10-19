@@ -1,4 +1,6 @@
 import { chooseAiAction, createCombat, getActiveUnit, performAction } from './engine'
+import { createKnightUnit, getKnightDefinition } from './knights'
+import type { ProgressionState } from './progression'
 import type { ActionResult, CombatAction, CombatState, UnitSetup } from './types'
 
 const demoUnits: UnitSetup[] = [
@@ -9,8 +11,23 @@ const demoUnits: UnitSetup[] = [
   { id: 'sanctuary-guard', name: 'Garde du Sanctuaire', team: 'enemy', hp: 30, maxHp: 30, attack: 7, defense: 3, speed: 5, cosmos: 0, maxCosmos: 2 },
 ]
 
+export const DEMO_ENEMIES: UnitSetup[] = demoUnits.filter((unit) => unit.team === 'enemy')
+
 export function createDemoCombat(): CombatState {
   return createCombat(demoUnits)
+}
+
+/** Builds the player's side from the saved squad, with stats scaled to each knight's level. */
+export function createSquadUnits(progression: ProgressionState): UnitSetup[] {
+  return progression.squad.flatMap((id) => {
+    const definition = getKnightDefinition(id)
+    const knight = progression.knights.find((entry) => entry.id === id)
+    return definition && knight ? [createKnightUnit(definition, knight.level)] : []
+  })
+}
+
+export function createSquadCombat(progression: ProgressionState): CombatState {
+  return createCombat([...createSquadUnits(progression), ...DEMO_ENEMIES])
 }
 
 export function playActionAndResolveAi(state: CombatState, actorId: string, action: CombatAction): ActionResult {

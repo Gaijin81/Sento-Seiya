@@ -1,23 +1,27 @@
 import { useState } from 'react'
-import { ArrowLeft, Crosshair, Flame, Heart, RotateCcw, Shield, Sparkles, Swords, Trophy, Zap } from 'lucide-react'
+import { ArrowLeft, Crosshair, Flame, Heart, RotateCcw, Shield, Sparkles, Swords, Trophy, Users, Zap } from 'lucide-react'
 import { getActiveUnit } from './engine'
-import { createDemoCombat, playActionAndResolveAi } from './session'
+import { getKnightDefinition } from './knights'
+import { createSquadCombat, createSquadUnits, DEMO_ENEMIES, playActionAndResolveAi } from './session'
 import type { CombatAction, CombatState } from './types'
-import { awardVictoryXp, createInitialProgression, loadProgression, saveProgression, VICTORY_XP, type ProgressionState } from './progression'
+import { awardVictoryXp, VICTORY_SHARDS, VICTORY_XP, type ProgressionState } from './progression'
 
-type Props = { onBack: () => void; onProgressionChanged?: (progression: ProgressionState) => void }
+type Props = {
+  progression: ProgressionState
+  /** Persists the new progression; returns false when the browser blocked the save. */
+  onProgressionChanged: (progression: ProgressionState) => boolean
+  onBack: () => void
+  onEditSquad: () => void
+}
 
 function createCombatId(): string {
   return 'combat-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2)
 }
 
-export default function CombatArena({ onBack, onProgressionChanged }: Props) {
-  const [combat, setCombat] = useState<CombatState>(() => createDemoCombat())
+export default function CombatArena({ progression, onProgressionChanged, onBack, onEditSquad }: Props) {
+  const [phase, setPhase] = useState<'preparation' | 'battle'>('preparation')
+  const [combat, setCombat] = useState<CombatState>(() => createSquadCombat(progression))
   const [combatId, setCombatId] = useState(() => createCombatId())
-  const [progression, setProgression] = useState<ProgressionState>(() => {
-    if (typeof window === 'undefined') return createInitialProgression()
-    try { return loadProgression(window.localStorage) } catch { return createInitialProgression() }
-  })
   const [saveWarning, setSaveWarning] = useState(false)
   const [targetId, setTargetId] = useState('black-pega')
   const [feedback, setFeedback] = useState('Choisis une action pour commencer le combat.')
@@ -38,17 +42,9 @@ export default function CombatArena({ onBack, onProgressionChanged }: Props) {
     }
     setCombat(result.state)
     if (result.state.status === 'victory') {
-      const rewarded = awardVictoryXp(progression, combatId, result.state)
-      if (rewarded !== progression) {
-        setProgression(rewarded)
-        onProgressionChanged?.(rewarded)
-        try {
-          if (typeof window !== 'undefined') saveProgression(window.localStorage, rewarded)
-          setSaveWarning(false)
-        } catch {
-          setSaveWarning(true)
-        }
-      }
+      const participants = result.state.units.filter((unit) => unit.team === 'player').map((unit) => unit.id)
+      const rewarded = awardVictoryXp(progression, combatId, result.state, participants)
+      if (rewarded !== progression) setSaveWarning(!onProgressionChanged(rewarded))
     }
     const latest = result.state.log[result.state.log.length - 1]
     setFeedback(result.state.status === 'victory'
@@ -58,11 +54,67 @@ export default function CombatArena({ onBack, onProgressionChanged }: Props) {
         : latest?.message ?? 'Action terminée.')
   }
 
-  const reset = () => {
-    setCombat(createDemoCombat())
+  const startBattle = () => {
+    setCombat(createSquadCombat(progression))
     setCombatId(createCombatId())
     setTargetId('black-pega')
     setFeedback('Nouveau combat : choisis une action.')
+    setPhase('battle')
+  }
+
+  if (phase === 'preparation') {
+    const squad = createSquadUnits(progression)
+    return (
+      <section className="page-section combat-page" aria-label="Préparation du combat">
+        <button className="text-button combat-back" onClick={onBack}><ArrowLeft size={15} /> Retour aux arènes</button>
+        <div className="eyebrow">ÉPREUVE DU SANCTUAIRE · PRÉPARATION</div>
+        <div className="combat-title-row">
+          <div><h1>Prépare ton escouade</h1><p className="page-intro">Vérifie tes chevaliers engagés et leurs statistiques actuelles avant d’entrer dans l’arène.</p></div>
+          <div className="round-pill">ESCOUADE <strong>{squad.length}/3</strong></div>
+        </div>
+        <div className="battlefield prep-field">
+          <div className="battle-side">
+            <div className="battle-side-heading"><span>CHEVALIERS ENGAGÉS</span><span>{squad.length} prêt(s)</span></div>
+            {squad.map((unit) => {
+              const definition = getKnightDefinition(unit.id)
+              const level = progression.knights.find((knight) => knight.id === unit.id)?.level ?? 1
+              return (
+                <article className="battle-unit ally" key={unit.id}>
+                  <div className={'battle-avatar ' + (definition?.color ?? '')}>{definition?.glyph ?? '?'}</div>
+                  <div className="battle-unit-main">
+                    <div className="battle-unit-name"><strong>{unit.name}</strong><span>NIV. {level}</span></div>
+                    <div className="meter-label"><Heart size={12} /> PV <b>{unit.maxHp}</b></div>
+                    <div className="meter-label"><Zap size={12} /> ATQ <b>{unit.attack}</b><span className="enemy-defense">DÉF {unit.defense} · VIT {unit.speed}</span></div>
+                    <div className="meter-label"><Flame size={12} /> {unit.technique?.name} <b>{unit.technique?.cost} Cosmos</b></div>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+          <div className="battle-divider"><span>VS</span><i /></div>
+          <div className="battle-side enemy-side">
+            <div className="battle-side-heading"><span>ADVERSAIRES ATTENDUS</span><span>{DEMO_ENEMIES.length}</span></div>
+            {DEMO_ENEMIES.map((unit) => (
+              <article className="battle-unit enemy" key={unit.id}>
+                <div className="battle-avatar enemy-avatar">{unit.name === 'Chevalier noir' ? '影' : '守'}</div>
+                <div className="battle-unit-main">
+                  <div className="battle-unit-name"><strong>{unit.name}</strong><span>ENNEMI</span></div>
+                  <div className="meter-label"><Heart size={12} /> PV <b>{unit.maxHp}</b></div>
+                  <div className="meter-label"><Zap size={12} /> ATQ <b>{unit.attack}</b><span className="enemy-defense">DÉF {unit.defense}</span></div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+        <div className="combat-controls panel prep-actions">
+          <p className="control-hint">Récompense de victoire : +{VICTORY_XP} XP pour chaque chevalier engagé et +{VICTORY_SHARDS} éclats de Cosmos pour recruter.</p>
+          <div className="prep-buttons">
+            <button className="secondary-button" onClick={onEditSquad}><Users size={15} /> Modifier l’escouade</button>
+            <button className="primary-button" onClick={startBattle}><Swords size={16} /> Lancer le combat</button>
+          </div>
+        </div>
+      </section>
+    )
   }
 
   return (
@@ -73,16 +125,16 @@ export default function CombatArena({ onBack, onProgressionChanged }: Props) {
         <div><h1>Le réveil du Cosmos</h1><p className="page-intro">Élimine les adversaires. Les tours de l’IA se résolvent automatiquement.</p></div>
         <div className="round-pill">TOUR <strong>{combat.round}</strong></div>
       </div>
-      <div className="progression-summary" aria-label="Progression sauvegardée"><span><Sparkles size={14} /> EXPÉRIENCE DU JOUEUR <strong>{progression.playerXp} XP</strong></span><span>VICTOIRES <strong>{progression.victories}</strong></span></div>
+      <div className="progression-summary" aria-label="Progression sauvegardée"><span><Sparkles size={14} /> EXPÉRIENCE DU JOUEUR <strong>{progression.playerXp} XP</strong></span><span>VICTOIRES <strong>{progression.victories}</strong></span><span>ÉCLATS <strong>{progression.cosmosShards}</strong></span></div>
       <div className="combat-status" role="status"><Sparkles size={17} /><span>{combat.status === 'victory' ? 'Victoire — le Sanctuaire reconnaît ta force.' : combat.status === 'defeat' ? 'Défaite — retente ta chance.' : active ? 'Au tour de ' + active.name + (active.team === 'enemy' ? ' (IA).' : '.') : 'Combat terminé.'}</span><span className={'status-tag ' + combat.status}>{combat.status === 'ongoing' ? 'EN COURS' : combat.status === 'victory' ? 'VICTOIRE' : 'DÉFAITE'}</span></div>
       <div className="battlefield">
         <div className="battle-side">
           <div className="battle-side-heading"><span>TES CHEVALIERS</span><span>{livingAllies.length}/{allies.length} actifs</span></div>
           {allies.map((unit) => (
             <article className={'battle-unit ally ' + (active?.id === unit.id ? 'unit-active ' : '') + (unit.hp <= 0 ? 'unit-defeated' : '')} key={unit.id}>
-              <div className="battle-avatar">{unit.name === 'Seiya' ? '天' : unit.name === 'Shiryu' ? '龍' : '白'}</div>
+              <div className={'battle-avatar ' + (getKnightDefinition(unit.id)?.color ?? '')}>{getKnightDefinition(unit.id)?.glyph ?? '?'}</div>
               <div className="battle-unit-main">
-                <div className="battle-unit-name"><strong>{unit.name}</strong><span>{unit.hp <= 0 ? 'HORS COMBAT' : active?.id === unit.id ? 'À TOI DE JOUER' : 'CHEVALIER DE BRONZE'}</span></div>
+                <div className="battle-unit-name"><strong>{unit.name}</strong><span>{unit.hp <= 0 ? 'HORS COMBAT' : active?.id === unit.id ? 'À TOI DE JOUER' : 'NIV. ' + (progression.knights.find((knight) => knight.id === unit.id)?.level ?? 1)}</span></div>
                 <div className="meter-label"><Heart size={12} /> PV <b>{unit.hp}/{unit.maxHp}</b></div>
                 <div className="battle-meter hp-meter"><span style={{ width: (unit.hp / unit.maxHp * 100) + '%' }} /></div>
                 <div className="meter-label"><Flame size={12} /> Cosmos <b>{unit.cosmos}/{unit.maxCosmos}</b></div>
@@ -118,8 +170,8 @@ export default function CombatArena({ onBack, onProgressionChanged }: Props) {
           <button className="combat-action" onClick={() => act({ type: 'focus' })} disabled={!isPlayerTurn || !active || active.cosmos >= active.maxCosmos}><Sparkles size={18} /><span><strong>Concentration</strong><small>Récupère jusqu’à 2 Cosmos</small></span></button>
         </div>
         <div className="combat-feedback" aria-live="polite">{feedback}</div>
-        {combat.status === 'victory' && <div className="victory-reward" role="status"><Trophy size={16} /> Victoire récompensée : +{VICTORY_XP} XP pour chacun de tes chevaliers. {saveWarning ? 'Attention : le navigateur a bloqué la sauvegarde locale.' : 'Progression sauvegardée sur cet appareil.'}</div>}
-        {combat.status !== 'ongoing' && <button className="primary-button rematch-button" onClick={reset}><RotateCcw size={16} /> Recommencer le combat</button>}
+        {combat.status === 'victory' && <div className="victory-reward" role="status"><Trophy size={16} /> Victoire récompensée : +{VICTORY_XP} XP pour chaque chevalier engagé et +{VICTORY_SHARDS} éclats de Cosmos. {saveWarning ? 'Attention : le navigateur a bloqué la sauvegarde locale.' : 'Progression sauvegardée sur cet appareil.'}</div>}
+        {combat.status !== 'ongoing' && <div className="prep-buttons"><button className="primary-button rematch-button" onClick={startBattle}><RotateCcw size={16} /> Recommencer le combat</button><button className="secondary-button rematch-button" onClick={() => setPhase('preparation')}><Users size={15} /> Retour à la préparation</button></div>}
       </div>
       <div className="panel combat-log"><div className="panel-heading"><div><div className="eyebrow">CHRONIQUE DU COMBAT</div><h2>Journal des actions</h2></div><span className="log-count">{combat.log.length} action(s)</span></div>
         {combat.log.length === 0 ? <p className="empty-log">Les actions apparaîtront ici au fil du combat.</p> : <ol>{[...combat.log].reverse().map((entry, index) => {

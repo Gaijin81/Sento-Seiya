@@ -46,13 +46,25 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 - [x] Vérifier tests et build dans GitHub Actions (run réussi sur le commit de la feature).
 - [ ] Ajouter des tests d'intégration navigateur réels de victoire et rechargement.
 
+## Recrutement et escouade — `feature/recruitment-squad`
+
+- [x] Catalogue de chevaliers (rang, statistiques de base, technique, coût, condition de victoires) avec Seiya, Shiryu et Hyoga au départ et Jabu, Shun et Ikki recrutables.
+- [x] Éclats de Cosmos : +30 par victoire, dépensés pour recruter.
+- [x] Recrutement avec vérification du coût, des victoires requises et des doublons.
+- [x] Escouade de 3 chevaliers maximum, au moins 1, modifiable depuis la page Équipe.
+- [x] Préparation du combat : l'arène utilise l'escouade et le niveau de chaque chevalier.
+- [x] XP de victoire attribuée uniquement aux chevaliers engagés.
+- [x] Sauvegarde v2 avec migration automatique des sauvegardes v1 (éclats rétroactifs pour les victoires passées).
+- [x] Tests du catalogue, du recrutement, de l'escouade, de la préparation du combat et de la migration.
+- [ ] Ajouter des illustrations dédiées pour les nouveaux chevaliers.
+
 ## Progression et collection
 
 - [ ] Modèle de données des chevaliers, armures, techniques et raretés.
 - [ ] XP, niveaux, progression persistante et récompenses.
-- [ ] Recrutement, collection, formation et composition d'équipe.
+- [ ] Collection étendue (88 chevaliers), formation et positionnement d'équipe.
 - [ ] Inventaire, équipement, améliorations et ressources.
-- [ ] Sauvegarde locale versionnée et migration des données.
+- [x] Sauvegarde locale versionnée et migration des données (v1 → v2).
 - [ ] Comptes et sauvegarde cloud multi-appareils.
 
 ## Campagnes et contenu
