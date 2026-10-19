@@ -81,6 +81,8 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 - [x] Sauvegarde séparée de la campagne (`sento-seiya-campaign`) : case, cases visitées, choix, combat en attente ; récompenses non redonnées en rejouant.
 - [x] Chapitre 1 « Le tournoi galactique » : 10 cases, 4 combats dont un boss, textes originaux.
 - [x] Tests de cohérence du chapitre, des choix, des conditions, des combats, des récompenses et de la sauvegarde.
+- [x] Chapitre 2 « L'ombre du Phénix » : 9 cases, 3 combats dont un boss, recrutement d'Ikki (combat ou dialogue), 2 trésors (Plume de feu, Cendres du Phénix), textes originaux.
+- [x] Sélection de chapitre : chaque chapitre a sa sauvegarde et se débloque quand le précédent est terminé (statut conservé en rejouant).
 - [ ] Chapitres suivants (Sanctuaire, Asgard, Poséidon, Hadès) après cadrage narratif.
 - [ ] Illustrations des scènes et musique d'ambiance par chapitre.
 

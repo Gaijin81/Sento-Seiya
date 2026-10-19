@@ -12,7 +12,7 @@ import { applyEquipment, availableCount, bonusLabel, allItems, equipItem, EQUIPM
 import CampaignBoard from './campaign/CampaignBoard'
 import LocalVersus from './versus/LocalVersus'
 import type { LocalMode } from './versus/match'
-import { CHAPTER_ONE } from './campaign/chapter1'
+import { CHAPTERS, getChapter, isChapterUnlocked } from './campaign/chapters'
 import { ENCOUNTERS } from './campaign/encounters'
 import { chooseOption, createCampaign, loadCampaign, pendingEncounter, resolveEncounter, saveCampaign, type CampaignResult } from './campaign/engine'
 import type { CampaignState } from './campaign/types'
@@ -26,6 +26,8 @@ import {
   Upload,
   Volume2,
   VolumeX,
+  BookOpen,
+  Lock,
 } from 'lucide-react'
 
 type Campaign = {
@@ -106,9 +108,14 @@ export default function App() {
   }
 
   const [campaign, setCampaign] = useState<CampaignState>(() => {
-    if (typeof window === 'undefined') return createCampaign(CHAPTER_ONE)
-    try { return loadCampaign(window.localStorage, CHAPTER_ONE) } catch { return createCampaign(CHAPTER_ONE) }
+    if (typeof window === 'undefined') return createCampaign(CHAPTERS[0])
+    try { return loadCampaign(window.localStorage, CHAPTERS[0]) } catch { return createCampaign(CHAPTERS[0]) }
   })
+  const chapter = getChapter(campaign.chapterId) ?? CHAPTERS[0]
+  const clearedChapters = CHAPTERS.filter((entry) => {
+    if (entry.id === campaign.chapterId) return Boolean(campaign.cleared)
+    try { return typeof window !== 'undefined' && Boolean(loadCampaign(window.localStorage, entry).cleared) } catch { return false }
+  }).map((entry) => entry.id)
   const [campaignOutcome, setCampaignOutcome] = useState('')
   const [campaignFight, setCampaignFight] = useState<string | null>(null)
   const [localMode, setLocalMode] = useState<LocalMode>('pvp')
@@ -155,6 +162,14 @@ export default function App() {
     try { installRawPack(JSON.parse(await file.text())) } catch { setPackErrors(['Le fichier n’est pas un JSON valide.']) }
   }
   const openLocal = (mode: LocalMode) => { setLocalMode(mode); setActiveSection('Partie locale') }
+
+  const selectChapter = (id: string) => {
+    const next = getChapter(id)
+    if (!next || next.id === campaign.chapterId || !isChapterUnlocked(id, clearedChapters)) return
+    try { setCampaign(loadCampaign(window.localStorage, next)) } catch { setCampaign(createCampaign(next)) }
+    setCampaignOutcome('')
+    setCampaignFight(null)
+  }
 
   const commitCampaign = (next: CampaignState) => {
     setCampaign(next)
@@ -256,7 +271,7 @@ export default function App() {
             backLabel="Retour à la campagne"
             onBack={() => setCampaignFight(null)}
             onEditSquad={() => setActiveSection('Équipe')}
-            onCombatEnd={(victory) => applyCampaign(resolveEncounter(CHAPTER_ONE, campaign, progression, victory))}
+            onCombatEnd={(victory) => applyCampaign(resolveEncounter(chapter, campaign, progression, victory))}
           />
         )}
 
@@ -279,15 +294,25 @@ export default function App() {
               <div className="hero-index"><span>01</span><i /> 03</div>
             </section>
 
+            <nav className="chapter-picker" aria-label="Chapitres">{CHAPTERS.map((entry, index) => {
+              const unlocked = isChapterUnlocked(entry.id, clearedChapters)
+              return (
+                <button key={entry.id} className={`chapter-tab ${entry.id === chapter.id ? 'active' : ''}`} aria-pressed={entry.id === chapter.id} disabled={!unlocked} onClick={() => selectChapter(entry.id)}>
+                  {unlocked ? <BookOpen size={14} /> : <Lock size={14} />} <span>{entry.title}</span>
+                  <small>{clearedChapters.includes(entry.id) ? 'Terminé' : unlocked ? 'En cours' : `Termine le chapitre ${index} pour débloquer`}</small>
+                </button>
+              )
+            })}</nav>
+
             <CampaignBoard
-              chapter={CHAPTER_ONE}
+              chapter={chapter}
               state={campaign}
               progression={progression}
               outcome={campaignOutcome}
-              onChoose={(choiceId) => { audio.sfx('select'); applyCampaign(chooseOption(CHAPTER_ONE, campaign, progression, choiceId)) }}
-              onResumeCombat={() => setCampaignFight(pendingEncounter(CHAPTER_ONE, campaign) ?? null)}
-              onRetreat={() => applyCampaign(resolveEncounter(CHAPTER_ONE, campaign, progression, false))}
-              onRestart={() => { commitCampaign(createCampaign(CHAPTER_ONE, campaign.rewarded)); setCampaignOutcome('') }}
+              onChoose={(choiceId) => { audio.sfx('select'); applyCampaign(chooseOption(chapter, campaign, progression, choiceId)) }}
+              onResumeCombat={() => setCampaignFight(pendingEncounter(chapter, campaign) ?? null)}
+              onRetreat={() => applyCampaign(resolveEncounter(chapter, campaign, progression, false))}
+              onRestart={() => { commitCampaign(createCampaign(chapter, campaign.rewarded, campaign.cleared)); setCampaignOutcome('') }}
             />
 
             <section className="stats-row" aria-label="Progression">

@@ -11,9 +11,12 @@ export type CampaignResult =
 
 export type ChoiceView = { choice: Choice; locked: string | null }
 
-export function createCampaign(chapter: Chapter, rewarded: string[] = []): CampaignState {
-  return { version: 1, chapterId: chapter.id, nodeId: chapter.start, visited: [chapter.start], flags: [], history: [], pending: null, rewarded: [...rewarded], completed: false }
+export function createCampaign(chapter: Chapter, rewarded: string[] = [], cleared = false): CampaignState {
+  return { version: 1, chapterId: chapter.id, nodeId: chapter.start, visited: [chapter.start], flags: [], history: [], pending: null, rewarded: [...rewarded], completed: false, cleared }
 }
+
+/** Each chapter has its own save; chapter 1 may still live under the original key. */
+export const campaignKey = (chapterId: string) => `${CAMPAIGN_KEY}:${chapterId}`
 
 export function getNode(chapter: Chapter, id: string): CampaignNode | undefined {
   return chapter.nodes.find((node) => node.id === id)
@@ -70,6 +73,7 @@ function resolve(chapter: Chapter, state: CampaignState, progression: Progressio
       pending: null,
       rewarded: state.rewarded.includes(key) || (!effects.shards && !effects.stardust && !effects.recruit && !effects.items?.length) ? state.rewarded : [...state.rewarded, key],
       completed: destination.kind === 'ending',
+      cleared: Boolean(state.cleared) || destination.kind === 'ending',
     },
   }
 }
@@ -150,18 +154,23 @@ export function parseCampaign(value: unknown, chapter: Chapter): CampaignState |
     pending: pending ? { nodeId: pending.nodeId, choiceId: pending.choiceId } : null,
     rewarded: [...new Set(candidate.rewarded)],
     completed: getNode(chapter, candidate.nodeId)?.kind === 'ending',
+    cleared: candidate.cleared === true || getNode(chapter, candidate.nodeId)?.kind === 'ending',
   }
 }
 
 export function loadCampaign(storage: StorageLike, chapter: Chapter): CampaignState {
   try {
-    const raw = storage.getItem(CAMPAIGN_KEY)
-    return (raw && parseCampaign(JSON.parse(raw), chapter)) || createCampaign(chapter)
+    for (const key of [campaignKey(chapter.id), CAMPAIGN_KEY]) {
+      const raw = storage.getItem(key)
+      const parsed = raw ? parseCampaign(JSON.parse(raw), chapter) : null
+      if (parsed) return parsed
+    }
+    return createCampaign(chapter)
   } catch {
     return createCampaign(chapter)
   }
 }
 
 export function saveCampaign(storage: StorageLike, state: CampaignState): void {
-  storage.setItem(CAMPAIGN_KEY, JSON.stringify(state))
+  storage.setItem(campaignKey(state.chapterId), JSON.stringify(state))
 }

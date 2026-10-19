@@ -119,6 +119,13 @@ L'arène de démonstration oppose l'escouade du joueur (1 à 3 chevaliers) à de
 - Une case « fin » termine le chapitre. Le chapitre peut être rejoué ; les récompenses de choix déjà obtenues ne sont pas redonnées.
 - La campagne est sauvegardée séparément de la progression (`sento-seiya-campaign`) ; une sauvegarde invalide redémarre le chapitre sans toucher à la progression.
 
+## 6 quinquies bis. Chapitres et sélection
+
+- Les chapitres se jouent dans l'ordre : le chapitre N+1 se débloque quand le chapitre N a atteint sa fin au moins une fois. Ce statut (`cleared`) est conservé quand on rejoue le chapitre.
+- Chaque chapitre a sa propre sauvegarde (`sento-seiya-campaign:<id>`) ; l'ancienne clé `sento-seiya-campaign` reste lue pour le chapitre 1.
+- Les identifiants de cases sont uniques entre chapitres (préfixe `c2-` pour le chapitre 2) : les récompenses déjà obtenues ne sont jamais redonnées.
+- Chapitre 2, « L'ombre du Phénix » : Ikki rejoint l'équipe en battant le Phénix masqué, ou sans combat si le joueur a médité à la source. Certains choix demandent Shun ou Hyoga dans l'escouade, ou 30 éclats de Cosmos.
+
 ## 6 sexies. Parties locales (même appareil)
 
 - **Joueur contre Joueur** : le Joueur 1 joue le camp gauche, le Joueur 2 le camp droit ; chacun engage 1 à 3 chevaliers (le même chevalier peut être dans les deux camps). Aucune IA n'agit.

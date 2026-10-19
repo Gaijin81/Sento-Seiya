@@ -4,7 +4,7 @@ import { createEncounterCombat } from '../combat/session'
 import { equipItem } from '../combat/equipment'
 import { CHAPTER_ONE } from './chapter1'
 import { ENCOUNTERS } from './encounters'
-import { CAMPAIGN_KEY, chooseOption, createCampaign, listChoices, loadCampaign, parseCampaign, resolveEncounter, saveCampaign, validateChapter } from './engine'
+import { campaignKey, chooseOption, createCampaign, listChoices, loadCampaign, parseCampaign, resolveEncounter, saveCampaign, validateChapter } from './engine'
 import type { CampaignState } from './types'
 
 function play(steps: (string | boolean)[], progression: ProgressionState = createInitialProgression(), start: CampaignState = createCampaign(CHAPTER_ONE)) {
@@ -102,9 +102,9 @@ describe('campaign chapter 1', () => {
     if (!fight.ok) throw new Error('fight')
     saveCampaign(storage, fight.state)
     expect(loadCampaign(storage, CHAPTER_ONE)).toEqual(fight.state)
-    store.set(CAMPAIGN_KEY, JSON.stringify({ ...fight.state, nodeId: 'nowhere' }))
+    store.set(campaignKey(CHAPTER_ONE.id), JSON.stringify({ ...fight.state, nodeId: 'nowhere' }))
     expect(loadCampaign(storage, CHAPTER_ONE)).toEqual(createCampaign(CHAPTER_ONE))
-    store.set(CAMPAIGN_KEY, '{oops')
+    store.set(campaignKey(CHAPTER_ONE.id), '{oops')
     expect(loadCampaign(storage, CHAPTER_ONE).nodeId).toBe('arrivee')
     expect(parseCampaign({ ...fight.state, pending: { nodeId: 'arrivee', choiceId: 'saluer' } }, CHAPTER_ONE)).toBeNull()
   })

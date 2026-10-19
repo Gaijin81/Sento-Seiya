@@ -219,3 +219,9 @@ button.battle-unit.enemy:disabled{cursor:default}
 .difficulty-option.active{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
 .difficulty-option.active strong{color:var(--gold)}
 @media(max-width:600px){.difficulty-options{grid-template-columns:1fr}}
+.chapter-picker{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 0}
+.chapter-tab{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:2px 8px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:transparent;color:#eef0f7;cursor:pointer;text-align:left}
+.chapter-tab small{grid-column:2;color:var(--muted);font-size:10px}
+.chapter-tab.active{border-color:var(--gold);color:var(--gold)}
+.chapter-tab:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:600px){.chapter-tab{flex:1 1 100%}}

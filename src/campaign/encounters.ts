@@ -32,6 +32,32 @@ export const ENCOUNTERS: Record<string, Encounter> = {
       enemy('black-2', 'Chevalier noir', { hp: 32, attack: 8, defense: 2, speed: 6, cosmos: 2 }, { x: 6, y: 3 }, { name: 'Onde obscure', cost: 2, power: 6, range: 2 }),
     ],
   },
+  'c2-recifs': {
+    id: 'c2-recifs',
+    title: 'Les récifs noirs',
+    enemies: [
+      enemy('black-swan', 'Cygne noir', { hp: 34, attack: 9, defense: 2, speed: 8, cosmos: 2 }, { x: 6, y: 1 }, { name: 'Blizzard obscur', cost: 2, power: 7, range: 3 }),
+      enemy('black-dragon', 'Dragon noir', { hp: 40, attack: 9, defense: 4, speed: 5, cosmos: 2 }, { x: 6, y: 3 }, { name: 'Griffe sombre', cost: 2, power: 7, range: 1 }),
+    ],
+  },
+  'c2-volcan': {
+    id: 'c2-volcan',
+    title: 'La pente de lave',
+    enemies: [
+      enemy('black-andromeda', 'Andromède noir', { hp: 36, attack: 8, defense: 3, speed: 7, cosmos: 2 }, { x: 6, y: 1 }, { name: 'Chaîne des ténèbres', cost: 2, power: 6, range: 3 }),
+      enemy('black-pegasus', 'Pégase noir', { hp: 36, attack: 10, defense: 2, speed: 10, cosmos: 2 }, { x: 6, y: 3 }, { name: 'Météores noirs', cost: 2, power: 7, range: 2 }),
+      enemy('lava-sentinel', 'Sentinelle de lave', { hp: 28, attack: 7, defense: 3, speed: 4 }, { x: 5, y: 2 }),
+    ],
+  },
+  'c2-phenix': {
+    id: 'c2-phenix',
+    title: 'Le Phénix masqué',
+    enemies: [
+      enemy('masked-phoenix', 'Phénix masqué', { hp: 80, attack: 12, defense: 5, speed: 11, cosmos: 4, maxCosmos: 7 }, { x: 6, y: 2 }, { name: 'Plumes ardentes', cost: 3, power: 11, range: 2 }),
+      enemy('black-4', 'Chevalier noir', { hp: 30, attack: 8, defense: 2, speed: 6, cosmos: 2 }, { x: 5, y: 0 }, { name: 'Onde obscure', cost: 2, power: 6, range: 2 }),
+      enemy('black-5', 'Chevalier noir', { hp: 30, attack: 8, defense: 2, speed: 6, cosmos: 2 }, { x: 5, y: 4 }, { name: 'Onde obscure', cost: 2, power: 6, range: 2 }),
+    ],
+  },
   boss: {
     id: 'boss',
     title: 'Le chef des chevaliers noirs',
