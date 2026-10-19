@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import CombatArena from './combat/CombatArena'
 import {
   Swords, Shield, Sparkles, Users, Map, ScrollText, Trophy,
   ChevronRight, Flame, Star, CircleHelp, Menu, X, Heart, Zap,
@@ -50,7 +51,7 @@ const roster = [
   { name: 'Hyoga', title: 'Chevalier du Cygne', level: 1, cosmos: 65, color: 'ice', initials: '白' },
 ]
 
-type Section = 'Campagne' | 'Équipe' | 'Arènes' | 'Codex'
+type Section = 'Campagne' | 'Équipe' | 'Arènes' | 'Combat' | 'Codex'
 
 export default function App() {
   const [activeSection, setActiveSection] = useState<Section>('Campagne')
@@ -67,6 +68,7 @@ export default function App() {
     { label: 'Campagne', icon: Map },
     { label: 'Équipe', icon: Users },
     { label: 'Arènes', icon: Swords },
+    { label: 'Combat', icon: Flame },
     { label: 'Codex', icon: ScrollText },
   ]
 
@@ -166,7 +168,9 @@ export default function App() {
 
         {activeSection === 'Équipe' && <section className="page-section"><div className="eyebrow">TES ALLIÉS · TON DESTIN</div><h1>Les chevaliers</h1><p className="page-intro">Construis une équipe complémentaire. Chaque chevalier possède ses propres statistiques et affinités.</p><div className="roster-page-grid">{roster.map((knight) => <article className="knight-detail" key={knight.name}><div className={`knight-portrait ${knight.color}`}>{knight.initials}</div><div className="eyebrow">CHEVALIER DE BRONZE</div><h2>{knight.name}</h2><p>{knight.title}</p><div className="detail-stat"><span>Niveau</span><strong>{knight.level}</strong></div><div className="detail-stat"><span>Puissance du Cosmos</span><strong>{knight.cosmos} PC</strong></div><div className="mini-track"><span style={{ width: `${knight.cosmos}%` }} /></div><button className="secondary-button" onClick={() => setNotice(`${knight.name} : fiche détaillée et progression à venir.`)}>Consulter la fiche <ChevronRight size={15} /></button></article>)}</div></section>}
 
-        {activeSection === 'Arènes' && <section className="page-section"><div className="eyebrow">COMBAT · HONNEUR · STRATÉGIE</div><h1>Les arènes</h1><p className="page-intro">Prépare-toi aux combats tactiques, aux défis contre l’IA et aux affrontements entre joueurs.</p><div className="arena-grid"><article className="arena-card"><div className="arena-icon"><Swords size={28} /></div><span className="campaign-subtitle">SOLO · PVE</span><h2>Épreuve du Sanctuaire</h2><p>Affronte une série d’adversaires contrôlés par l’IA et teste ta stratégie.</p><span className="coming-soon">MOTEUR DE COMBAT À VENIR</span></article><article className="arena-card"><div className="arena-icon violet-icon"><Shield size={28} /></div><span className="campaign-subtitle">DUEL · PVP</span><h2>Défi des chevaliers</h2><p>Compare tes équipes et mesure ta maîtrise du Cosmos contre d’autres joueurs.</p><span className="coming-soon">MULTIJOUEUR À VENIR</span></article><article className="arena-card"><div className="arena-icon jade-icon"><Users size={28} /></div><span className="campaign-subtitle">COOPÉRATION</span><h2>Alliance des héros</h2><p>Unis tes forces avec d’autres joueurs pour vaincre des boss redoutables.</p><span className="coming-soon">COOP À VENIR</span></article></div></section>}
+        {activeSection === 'Arènes' && <section className="page-section"><div className="eyebrow">COMBAT · HONNEUR · STRATÉGIE</div><h1>Les arènes</h1><p className="page-intro">Prépare-toi aux combats tactiques, aux défis contre l’IA et aux affrontements entre joueurs.</p><div className="arena-grid"><article className="arena-card"><div className="arena-icon"><Swords size={28} /></div><span className="campaign-subtitle">SOLO · PVE</span><h2>Épreuve du Sanctuaire</h2><p>Affronte une série d’adversaires contrôlés par l’IA et teste ta stratégie.</p><button className="secondary-button arena-launch" onClick={() => setActiveSection('Combat')}><Swords size={15} /> Lancer un combat <ChevronRight size={15} /></button></article><article className="arena-card"><div className="arena-icon violet-icon"><Shield size={28} /></div><span className="campaign-subtitle">DUEL · PVP</span><h2>Défi des chevaliers</h2><p>Compare tes équipes et mesure ta maîtrise du Cosmos contre d’autres joueurs.</p><span className="coming-soon">MULTIJOUEUR À VENIR</span></article><article className="arena-card"><div className="arena-icon jade-icon"><Users size={28} /></div><span className="campaign-subtitle">COOPÉRATION</span><h2>Alliance des héros</h2><p>Unis tes forces avec d’autres joueurs pour vaincre des boss redoutables.</p><span className="coming-soon">COOP À VENIR</span></article></div></section>}
+
+        {activeSection === 'Combat' && <CombatArena onBack={() => setActiveSection('Arènes')} />}
 
         {activeSection === 'Codex' && <section className="page-section"><div className="eyebrow">ARCHIVES · MYTHES · LÉGENDES</div><h1>Codex du Cosmos</h1><p className="page-intro">Le codex rassemblera les chevaliers, les armures, les factions, les lieux et les récits découverts durant tes aventures.</p><div className="codex-grid"><article><Shield size={24} /><h2>Armures sacrées</h2><p>Bronze, Argent, Or et armures légendaires.</p></article><article><Star size={24} /><h2>Chevaliers & factions</h2><p>Personnages, affiliations, techniques et liens.</p></article><article><Map size={24} /><h2>Atlas des royaumes</h2><p>Sanctuaire, Asgard, royaume sous-marin et au-delà.</p></article><article><ScrollText size={24} /><h2>Chroniques</h2><p>Arcs narratifs et chronologie des aventures.</p></article></div><p className="rights-note">Les contenus officiels, images, musiques et noms associés à la licence restent soumis aux droits de leurs ayants droit. Ce prototype utilise une interface originale et des éléments textuels provisoires.</p></section>}
 

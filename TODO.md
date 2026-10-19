@@ -22,6 +22,18 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 - [x] Faire réussir les tests et le build dans GitHub Actions.
 - [ ] Créer une PR dédiée; ne pas mélanger cette feature aux autres.
 
+## Interface de combat tactique — `feature/combat-ui`
+
+- [x] Relier l'arène de combat à la navigation de l'application.
+- [x] Afficher les chevaliers, PV, Cosmos, cibles et ordre de tour.
+- [x] Permettre attaque, technique spéciale, garde et concentration.
+- [x] Résoudre automatiquement les actions de l'IA après le tour de l'équipe du joueur.
+- [x] Afficher les messages de combat, le journal, la victoire et la défaite.
+- [x] Permettre de recommencer un combat terminé.
+- [x] Ajouter des tests de session et de résolution des tours IA.
+- [x] Vérifier tests unitaires et build dans GitHub Actions.
+- [ ] Ajouter des tests de parcours navigateur réels (E2E).
+
 ## Progression et collection
 
 - [ ] Modèle de données des chevaliers, armures, techniques et raretés.

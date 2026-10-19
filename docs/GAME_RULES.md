@@ -63,6 +63,17 @@ L'IA doit être déterministe pour les tests, avec une stratégie simple :
 
 Une future IA plus élaborée pourra évaluer les soins, la garde, les synergies, les objectifs et le terrain.
 
+## 6 bis. Prototype jouable de l'arène
+
+L'arène de démonstration propose une équipe de trois chevaliers contre deux adversaires. Les valeurs et techniques utilisées sont provisoires et servent à valider la boucle de combat, pas l'équilibrage final.
+
+- L'équipe du joueur agit dans l'ordre d'initiative; chaque chevalier vivant reçoit une activation.
+- Quand tous les chevaliers du joueur ont agi, l'IA résout automatiquement les activations ennemies jusqu'au prochain tour joueur ou à la fin du combat.
+- Le joueur peut sélectionner un adversaire vivant et choisir attaque, technique spéciale, garde ou concentration.
+- Une technique est désactivée si le chevalier ne dispose pas du Cosmos nécessaire.
+- Le journal affiche les actions résolues; la partie affiche victoire ou défaite quand une équipe n'a plus de combattants actifs.
+- Après la fin du combat, le joueur peut recommencer. Aucun XP ni récompense n'est encore attribué, et l'état de combat n'est pas sauvegardé après rechargement.
+
 ## 7. Modes prévus
 
 - **PvE** : le joueur affronte des unités contrôlées par l'IA.
