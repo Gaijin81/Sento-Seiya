@@ -3,6 +3,7 @@ import { parseProgression, VICTORY_STARDUST, createInitialProgression, loadProgr
 import { createKnightUnit, getKnightDefinition, knightStatsAtLevel, type KnightDefinition } from './combat/knights'
 import { getRecruitableKnights, getRecruitStatus, recruitKnight, toggleSquadMember, type ProgressionResult } from './combat/recruitment'
 import CombatArena from './combat/CombatArena'
+import { DIFFICULTIES, DIFFICULTY_INFO, loadDifficulty, saveDifficulty, type Difficulty } from './combat/difficulty'
 import { audio, THEME_LABELS, THEMES, type Theme } from './audio/engine'
 import { loadAudioSettings, saveAudioSettings, type AudioSettings } from './audio/settings'
 import { activatePacks, installPack, loadInstalledPacks, saveInstalledPacks, uninstallPack, type ContentPack } from './dlc/manifest'
@@ -114,6 +115,12 @@ export default function App() {
   const [audioSettings, setAudioSettings] = useState<AudioSettings>(() => (typeof window === 'undefined' ? loadAudioSettings({ getItem: () => null, setItem: () => undefined }) : loadAudioSettings(window.localStorage)))
   const [packs, setPacks] = useState<ContentPack[]>(() => BOOT_PACKS)
   const [packErrors, setPackErrors] = useState<string[]>([])
+  const [difficulty, setDifficulty] = useState<Difficulty>(() => (typeof window === 'undefined' ? 'normal' : loadDifficulty(window.localStorage)))
+  const changeDifficulty = (next: Difficulty) => {
+    setDifficulty(next)
+    try { saveDifficulty(window.localStorage, next) } catch { /* setting stays in memory */ }
+    setNotice(`Difficulté : ${DIFFICULTY_INFO[next].label}.`)
+  }
 
   const theme: Theme = activeSection === 'Combat' || activeSection === 'Partie locale' || (activeSection === 'Campagne' && campaignFight) ? 'battle' : activeSection === 'Campagne' ? 'campaign' : 'menu'
   useEffect(() => { audio.playTheme(theme) }, [theme])
@@ -403,6 +410,13 @@ export default function App() {
             <div className="eyebrow">SON · CONTENUS ADDITIONNELS</div>
             <h1>Options</h1>
             <div className="options-grid">
+              <article className="panel options-wide">
+                <div className="panel-heading"><div><div className="eyebrow">COMBATS CONTRE L’IA</div><h2>Difficulté</h2></div><span className="log-count">Arènes et campagne</span></div>
+                <div className="difficulty-options" role="radiogroup" aria-label="Difficulté">{DIFFICULTIES.map((entry) => (
+                  <button key={entry} role="radio" aria-checked={difficulty === entry} className={`difficulty-option ${difficulty === entry ? 'active' : ''}`} onClick={() => changeDifficulty(entry)}><strong>{DIFFICULTY_INFO[entry].label}</strong><small>{DIFFICULTY_INFO[entry].description}</small></button>
+                ))}</div>
+                <p className="control-hint">Les récompenses ne changent pas. Les parties locales (duel et coop) ne sont pas affectées.</p>
+              </article>
               <article className="panel">
                 <div className="panel-heading"><div><div className="eyebrow">AUDIO</div><h2>Musique et effets</h2></div><button className="secondary-button" aria-pressed={audioSettings.muted} onClick={() => setAudioSettings({ ...audioSettings, muted: !audioSettings.muted })}>{audioSettings.muted ? <VolumeX size={15} /> : <Volume2 size={15} />} {audioSettings.muted ? 'Son coupé' : 'Son activé'}</button></div>
                 <label className="volume-row"><span>Musique</span><input type="range" min={0} max={100} step={5} value={audioSettings.music} onChange={(event) => setAudioSettings({ ...audioSettings, music: Number(event.target.value) })} aria-label="Volume de la musique" /><strong>{audioSettings.music} %</strong></label>
@@ -427,7 +441,7 @@ export default function App() {
             </div>
           </section>
         )}
-        {activeSection === 'Combat' && <CombatArena progression={progression} onProgressionChanged={commitProgression} onBack={() => setActiveSection('Arènes')} onEditSquad={() => setActiveSection('Équipe')} />}
+        {activeSection === 'Combat' && <CombatArena difficulty={difficulty} progression={progression} onProgressionChanged={commitProgression} onBack={() => setActiveSection('Arènes')} onEditSquad={() => setActiveSection('Équipe')} />}
 
         {activeSection === 'Codex' && <section className="page-section"><div className="eyebrow">ARCHIVES · MYTHES · LÉGENDES</div><h1>Codex du Cosmos</h1><p className="page-intro">Le codex rassemblera les chevaliers, les armures, les factions, les lieux et les récits découverts durant tes aventures.</p><div className="codex-grid"><article><Shield size={24} /><h2>Armures sacrées</h2><p>Bronze, Argent, Or et armures légendaires.</p></article><article><Star size={24} /><h2>Chevaliers & factions</h2><p>Personnages, affiliations, techniques et liens.</p></article><article><Map size={24} /><h2>Atlas des royaumes</h2><p>Sanctuaire, Asgard, royaume sous-marin et au-delà.</p></article><article><ScrollText size={24} /><h2>Chroniques</h2><p>Arcs narratifs et chronologie des aventures.</p></article></div><p className="rights-note">Les contenus officiels, images, musiques et noms associés à la licence restent soumis aux droits de leurs ayants droit. Ce prototype utilise une interface originale et des éléments textuels provisoires.</p></section>}
 

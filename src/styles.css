@@ -212,3 +212,10 @@ button.battle-unit.enemy:disabled{cursor:default}
 .cell-cosmos .terrain-mark{color:#c9a8ff}
 .terrain-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 0 0;font-size:10px;color:var(--muted)}
 .terrain-legend span{display:inline-flex;align-items:center;gap:4px}
+.options-wide{grid-column:1/-1}
+.difficulty-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.difficulty-option{display:grid;gap:4px;text-align:left;padding:12px;border:1px solid var(--line);border-radius:10px;background:transparent;color:#eef0f7;cursor:pointer}
+.difficulty-option small{color:var(--muted);font-size:10px}
+.difficulty-option.active{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+.difficulty-option.active strong{color:var(--gold)}
+@media(max-width:600px){.difficulty-options{grid-template-columns:1fr}}

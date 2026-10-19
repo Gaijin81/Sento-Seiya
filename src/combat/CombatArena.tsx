@@ -7,6 +7,7 @@ import { createEncounterCombat, createSquadUnits, DEMO_ENEMIES, playActionAndRes
 import type { Encounter } from '../campaign/types'
 import TacticalBoard, { unitGlyph } from './TacticalBoard'
 import { audio } from '../audio/engine'
+import { applyDifficulty, DIFFICULTY_INFO, type Difficulty } from './difficulty'
 import type { CombatAction, CombatState, CombatUnit, Position } from './types'
 import { awardVictoryXp, VICTORY_SHARDS, VICTORY_STARDUST, VICTORY_XP, type ProgressionState } from './progression'
 
@@ -14,6 +15,7 @@ type Props = {
   progression: ProgressionState
   /** Persists the new progression; returns false when the browser blocked the save. */
   onProgressionChanged: (progression: ProgressionState) => boolean
+  difficulty?: Difficulty
   onBack: () => void
   onEditSquad: () => void
   /** Campaign fight; defaults to the Sanctuary trial. */
@@ -26,8 +28,9 @@ function createCombatId(): string {
   return 'combat-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2)
 }
 
-export default function CombatArena({ progression, onProgressionChanged, onBack, onEditSquad, encounter, onCombatEnd, backLabel = 'Retour aux arènes' }: Props) {
-  const enemySetups = encounter?.enemies ?? DEMO_ENEMIES
+export default function CombatArena({ progression, onProgressionChanged, onBack, onEditSquad, encounter, onCombatEnd, backLabel = 'Retour aux arènes', difficulty = 'normal' }: Props) {
+  const enemySetups = applyDifficulty(encounter?.enemies ?? DEMO_ENEMIES, difficulty)
+  const difficultyLabel = DIFFICULTY_INFO[difficulty].label
   const [phase, setPhase] = useState<'preparation' | 'battle'>('preparation')
   const [combat, setCombat] = useState<CombatState>(() => createEncounterCombat(progression, enemySetups))
   const [combatId, setCombatId] = useState(() => createCombatId())
@@ -91,7 +94,7 @@ export default function CombatArena({ progression, onProgressionChanged, onBack,
     return (
       <section className="page-section combat-page" aria-label="Préparation du combat">
         <button className="text-button combat-back" onClick={onBack}><ArrowLeft size={15} /> {backLabel}</button>
-        <div className="eyebrow">ÉPREUVE DU SANCTUAIRE · PRÉPARATION</div>
+        <div className="eyebrow">ÉPREUVE DU SANCTUAIRE · PRÉPARATION · {difficultyLabel.toUpperCase()}</div>
         <div className="combat-title-row">
           <div><h1>Prépare ton escouade</h1><p className="page-intro">Vérifie tes chevaliers engagés et leurs statistiques actuelles avant d’entrer dans l’arène.</p></div>
           <div className="round-pill">ESCOUADE <strong>{squad.length}/3</strong></div>
@@ -144,7 +147,7 @@ export default function CombatArena({ progression, onProgressionChanged, onBack,
   return (
     <section className="page-section combat-page" aria-label="Combat tactique">
       <button className="text-button combat-back" onClick={onBack}><ArrowLeft size={15} /> {backLabel}</button>
-      <div className="eyebrow">ÉPREUVE DU SANCTUAIRE · COMBAT TACTIQUE</div>
+      <div className="eyebrow">ÉPREUVE DU SANCTUAIRE · COMBAT TACTIQUE · {difficultyLabel.toUpperCase()}</div>
       <div className="combat-title-row">
         <div><h1>{encounter?.title ?? 'Le réveil du Cosmos'}</h1><p className="page-intro">Déplace tes chevaliers sur le plateau, puis frappe les adversaires à portée. Les tours de l’IA se résolvent automatiquement.</p></div>
         <div className="round-pill">TOUR <strong>{combat.round}</strong></div>

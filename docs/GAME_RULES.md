@@ -136,6 +136,12 @@ L'arène de démonstration oppose l'escouade du joueur (1 à 3 chevaliers) à de
 - Les parties locales (PvP / coop) n'utilisent pas l'équipement, pour rester équitables.
 - Sauvegarde v3 : les sauvegardes v1 et v2 sont migrées automatiquement, sans poussières ni objets.
 
+## 6 quaterdecies. Difficulté
+
+- Réglée dans Options et sauvegardée (`sento-seiya-difficulty`), elle s'applique aux combats contre l'IA (arènes et campagne), pas aux parties locales.
+- Facile : adversaires −20 % PV et −2 ATQ (minimum 1). Normal : statistiques prévues. Difficile : adversaires +25 % PV, +2 ATQ, +1 DÉF.
+- Les chevaliers du joueur et les récompenses ne changent pas.
+
 ## 6 terdecies. Terrain du plateau
 
 - Couverture (bouclier) : un chevalier qui s'y trouve subit 2 dégâts de moins par coup (minimum 1, avant la réduction de garde).
