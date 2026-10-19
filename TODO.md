@@ -157,7 +157,8 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 - [x] Tests unitaires pour les règles métier.
 - [x] Tests d'intégration des sauvegardes et des combats.
 - [ ] Tests de parcours UI critiques.
-- [ ] Accessibilité clavier, contrastes et lecteurs d'écran.
+- [x] Accessibilité : lien « Aller au contenu », plateau tactique navigable aux flèches (Entrée pour agir), page active annoncée, Échap ferme le menu mobile, contrastes relevés, focus visible partout, animations réduites si demandé par le système.
+- [ ] Accessibilité : plateau d'aventure navigable au clavier case par case et audit avec un lecteur d'écran réel.
 - [ ] Vérifier les performances sur smartphone et tablette.
 - [x] PWA : manifeste, icônes, installation sur smartphone/PC et service worker (jeu jouable hors ligne après la première visite).
 - [ ] Notification « nouvelle version disponible » quand le service worker se met à jour.

@@ -210,6 +210,13 @@ export default function App() {
     document.getElementById('campaign-board')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
+  useEffect(() => {
+    if (!mobileMenu) return
+    const closeOnEscape = (event: globalThis.KeyboardEvent) => { if (event.key === 'Escape') setMobileMenu(false) }
+    window.addEventListener('keydown', closeOnEscape)
+    return () => window.removeEventListener('keydown', closeOnEscape)
+  }, [mobileMenu])
+
   const navItems: { label: Section; icon: typeof Map }[] = [
     { label: 'Campagne', icon: Map },
     { label: 'Équipe', icon: Users },
@@ -221,6 +228,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#main-content">Aller au contenu</a>
       <aside className={`sidebar ${mobileMenu ? 'sidebar-open' : ''}`}>
         <div className="brand">
           <div className="brand-mark"><Sparkles size={21} /></div>
@@ -239,7 +247,7 @@ export default function App() {
         <div className="nav-label">SANCTUAIRE</div>
         <nav className="main-nav" aria-label="Navigation principale">
           {navItems.map(({ label, icon: Icon }) => (
-            <button key={label} className={`nav-item ${activeSection === label ? 'active' : ''}`} onClick={() => { setActiveSection(label); setMobileMenu(false); setNotice('') }}>
+            <button key={label} className={`nav-item ${activeSection === label ? 'active' : ''}`} aria-current={activeSection === label ? 'page' : undefined} onClick={() => { setActiveSection(label); setMobileMenu(false); setNotice('') }}>
               <Icon size={18} strokeWidth={1.8} /><span>{label}</span>{activeSection === label && <ChevronRight size={16} className="nav-chevron" />}
             </button>
           ))}
@@ -257,7 +265,7 @@ export default function App() {
 
       {mobileMenu && <button className="scrim" aria-label="Fermer le menu" onClick={() => setMobileMenu(false)} />}
 
-      <main className="main-content">
+      <main className="main-content" id="main-content" tabIndex={-1}>
         <header className="topbar">
           <button className="icon-button mobile-menu-button" onClick={() => setMobileMenu(true)} aria-label="Ouvrir le menu"><Menu size={21} /></button>
           <div className="breadcrumb"><span>SANCTUAIRE</span><ChevronRight size={14} /><strong>{activeSection.toUpperCase()}</strong></div>
