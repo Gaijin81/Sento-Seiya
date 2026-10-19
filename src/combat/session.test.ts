@@ -12,12 +12,18 @@ describe('combat session used by the arena UI', () => {
 
   it('resolves enemy AI turns automatically after a player action', () => {
     const state = createDemoCombat()
-    const result = playActionAndResolveAi(state, 'seiya', { type: 'attack', targetId: 'black-pega' })
-    expect(result.ok).toBe(true)
-    if (!result.ok) return
-    expect(result.state.log.some((entry) => entry.actorId === 'seiya')).toBe(true)
-    expect(result.state.log.some((entry) => entry.actorId === 'black-pega' || entry.actorId === 'sanctuary-guard')).toBe(true)
-    expect(getActiveUnit(result.state)?.team).toBe('player')
+    const first = playActionAndResolveAi(state, 'seiya', { type: 'attack', targetId: 'black-pega' })
+    expect(first.ok).toBe(true)
+    if (!first.ok) return
+    const second = playActionAndResolveAi(first.state, 'shiryu', { type: 'attack', targetId: 'black-pega' })
+    expect(second.ok).toBe(true)
+    if (!second.ok) return
+    const third = playActionAndResolveAi(second.state, 'hyoga', { type: 'attack', targetId: 'sanctuary-guard' })
+    expect(third.ok).toBe(true)
+    if (!third.ok) return
+    expect(third.state.log.some((entry) => entry.actorId === 'seiya')).toBe(true)
+    expect(third.state.log.some((entry) => entry.actorId === 'black-pega' || entry.actorId === 'sanctuary-guard')).toBe(true)
+    expect(getActiveUnit(third.state)?.team).toBe('player')
   })
 
   it('rejects attempts to act out of turn without mutating combat state', () => {
