@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { ArrowLeft, Crosshair, Flame, Heart, RotateCcw, Shield, Sparkles, Swords, Trophy, Users, Zap } from 'lucide-react'
+import { ArrowLeft, Crosshair, Flame, Footprints, Heart, RotateCcw, Shield, SkipForward, Sparkles, Swords, Trophy, Users, Zap } from 'lucide-react'
+import { attackRange, isObstacle, isWithinRange, reachableCells, samePosition, techniqueRange, unitAt } from './board'
 import { getActiveUnit } from './engine'
 import { getKnightDefinition } from './knights'
 import { createSquadCombat, createSquadUnits, DEMO_ENEMIES, playActionAndResolveAi } from './session'
-import type { CombatAction, CombatState } from './types'
+import type { CombatAction, CombatState, CombatUnit, Position } from './types'
 import { awardVictoryXp, VICTORY_SHARDS, VICTORY_XP, type ProgressionState } from './progression'
 
 type Props = {
@@ -12,6 +13,11 @@ type Props = {
   onProgressionChanged: (progression: ProgressionState) => boolean
   onBack: () => void
   onEditSquad: () => void
+}
+
+function unitGlyph(unit: CombatUnit): string {
+  if (unit.team === 'player') return getKnightDefinition(unit.id)?.glyph ?? '?'
+  return unit.name === 'Chevalier noir' ? '影' : '守'
 }
 
 function createCombatId(): string {
@@ -24,7 +30,7 @@ export default function CombatArena({ progression, onProgressionChanged, onBack,
   const [combatId, setCombatId] = useState(() => createCombatId())
   const [saveWarning, setSaveWarning] = useState(false)
   const [targetId, setTargetId] = useState('black-pega')
-  const [feedback, setFeedback] = useState('Choisis une action pour commencer le combat.')
+  const [feedback, setFeedback] = useState('Déplace-toi sur une case dorée ou choisis une action.')
   const active = getActiveUnit(combat)
   const allies = combat.units.filter((unit) => unit.team === 'player')
   const enemies = combat.units.filter((unit) => unit.team === 'enemy')
@@ -32,6 +38,20 @@ export default function CombatArena({ progression, onProgressionChanged, onBack,
   const livingAllies = allies.filter((unit) => unit.hp > 0)
   const selectedTarget = livingEnemies.find((unit) => unit.id === targetId) ?? livingEnemies[0]
   const isPlayerTurn = active?.team === 'player' && combat.status === 'ongoing'
+  const moveCells = isPlayerTurn && active && !combat.moved ? reachableCells(combat, active.id) : []
+  const inAttackRange = (target?: CombatUnit) => Boolean(active && target && isWithinRange(combat, active, target, attackRange(active)))
+  const inTechniqueRange = (target?: CombatUnit) => Boolean(active && target && isWithinRange(combat, active, target, techniqueRange(active)))
+
+  const onCellClick = (cell: Position) => {
+    if (!isPlayerTurn) return
+    const occupant = unitAt(combat, cell)
+    if (occupant?.team === 'enemy') {
+      setTargetId(occupant.id)
+      setFeedback(occupant.name + ' ciblé' + (inAttackRange(occupant) || inTechniqueRange(occupant) ? '.' : ' : hors de portée, rapproche-toi.'))
+      return
+    }
+    if (moveCells.some((reachable) => samePosition(reachable, cell))) act({ type: 'move', to: cell })
+  }
 
   const act = (action: CombatAction) => {
     if (!active || !isPlayerTurn) return
@@ -58,7 +78,7 @@ export default function CombatArena({ progression, onProgressionChanged, onBack,
     setCombat(createSquadCombat(progression))
     setCombatId(createCombatId())
     setTargetId('black-pega')
-    setFeedback('Nouveau combat : choisis une action.')
+    setFeedback('Nouveau combat : déplace-toi sur une case dorée ou choisis une action.')
     setPhase('battle')
   }
 
@@ -122,11 +142,39 @@ export default function CombatArena({ progression, onProgressionChanged, onBack,
       <button className="text-button combat-back" onClick={onBack}><ArrowLeft size={15} /> Retour aux arènes</button>
       <div className="eyebrow">ÉPREUVE DU SANCTUAIRE · COMBAT TACTIQUE</div>
       <div className="combat-title-row">
-        <div><h1>Le réveil du Cosmos</h1><p className="page-intro">Élimine les adversaires. Les tours de l’IA se résolvent automatiquement.</p></div>
+        <div><h1>Le réveil du Cosmos</h1><p className="page-intro">Déplace tes chevaliers sur le plateau, puis frappe les adversaires à portée. Les tours de l’IA se résolvent automatiquement.</p></div>
         <div className="round-pill">TOUR <strong>{combat.round}</strong></div>
       </div>
       <div className="progression-summary" aria-label="Progression sauvegardée"><span><Sparkles size={14} /> EXPÉRIENCE DU JOUEUR <strong>{progression.playerXp} XP</strong></span><span>VICTOIRES <strong>{progression.victories}</strong></span><span>ÉCLATS <strong>{progression.cosmosShards}</strong></span></div>
       <div className="combat-status" role="status"><Sparkles size={17} /><span>{combat.status === 'victory' ? 'Victoire — le Sanctuaire reconnaît ta force.' : combat.status === 'defeat' ? 'Défaite — retente ta chance.' : active ? 'Au tour de ' + active.name + (active.team === 'enemy' ? ' (IA).' : '.') : 'Combat terminé.'}</span><span className={'status-tag ' + combat.status}>{combat.status === 'ongoing' ? 'EN COURS' : combat.status === 'victory' ? 'VICTOIRE' : 'DÉFAITE'}</span></div>
+      {combat.board && (
+        <div className="panel tactical-panel">
+          <div className="panel-heading"><div><div className="eyebrow">PLATEAU · ARÈNE DU SANCTUAIRE</div><h2>{!isPlayerTurn ? 'Plateau' : combat.moved ? 'Agis ou termine ton tour' : 'Touche une case dorée pour te déplacer'}</h2></div>{active && isPlayerTurn && <span className="control-hint"><Footprints size={13} /> Mouv. {active.move ?? 3} · Portée {attackRange(active)} · Technique {techniqueRange(active)}</span>}</div>
+          <div className="tactical-board" role="grid" aria-label="Plateau de combat" style={{ gridTemplateColumns: `repeat(${combat.board.width}, minmax(0, 1fr))` }}>
+            {Array.from({ length: combat.board.height }, (_, y) => Array.from({ length: combat.board!.width }, (_, x) => {
+              const cell = { x, y }
+              const occupant = unitAt(combat, cell)
+              const obstacle = isObstacle(combat.board!, cell)
+              const reachable = moveCells.some((entry) => samePosition(entry, cell))
+              const targetable = occupant?.team === 'enemy' && isPlayerTurn && (inAttackRange(occupant) || inTechniqueRange(occupant))
+              const classes = ['board-cell',
+                obstacle ? 'cell-obstacle' : '',
+                reachable ? 'cell-reachable' : '',
+                occupant ? 'cell-' + (occupant.team === 'player' ? 'ally' : 'enemy') : '',
+                occupant && occupant.id === active?.id ? 'cell-active' : '',
+                occupant && occupant.id === selectedTarget?.id ? 'cell-target' : '',
+                targetable ? 'cell-in-range' : ''].filter(Boolean).join(' ')
+              const label = 'Case ' + (x + 1) + '-' + (y + 1) + (obstacle ? ', pilier' : '') + (occupant ? ', ' + occupant.name + ' ' + occupant.hp + '/' + occupant.maxHp + ' PV' : '') + (reachable ? ', déplacement possible' : '') + (targetable ? ', à portée' : '')
+              return (
+                <button type="button" role="gridcell" key={x + '-' + y} className={classes} aria-label={label} onClick={() => onCellClick(cell)} disabled={!isPlayerTurn || obstacle || (!reachable && occupant?.team !== 'enemy')}>
+                  {obstacle && <span className="pillar" aria-hidden="true">▲</span>}
+                  {occupant && <span className={'board-token ' + (occupant.team === 'player' ? getKnightDefinition(occupant.id)?.color ?? '' : 'enemy-avatar')} aria-hidden="true">{unitGlyph(occupant)}<i style={{ width: (occupant.hp / occupant.maxHp * 100) + '%' }} /></span>}
+                </button>
+              )
+            }))}
+          </div>
+        </div>
+      )}
       <div className="battlefield">
         <div className="battle-side">
           <div className="battle-side-heading"><span>TES CHEVALIERS</span><span>{livingAllies.length}/{allies.length} actifs</span></div>
@@ -164,10 +212,11 @@ export default function CombatArena({ progression, onProgressionChanged, onBack,
       <div className="combat-controls panel">
         <div className="panel-heading"><div><div className="eyebrow">ORDRES DE COMBAT</div><h2>{active?.team === 'player' ? active.name : 'Résolution du tour'}</h2></div><span className="control-hint">Choisis une action légale</span></div>
         <div className="combat-action-grid">
-          <button className="combat-action primary-action" onClick={() => selectedTarget && act({ type: 'attack', targetId: selectedTarget.id })} disabled={!isPlayerTurn || !selectedTarget}><Swords size={18} /><span><strong>Attaque</strong><small>Dégâts physiques</small></span></button>
-          <button className="combat-action" onClick={() => selectedTarget && act({ type: 'technique', targetId: selectedTarget.id })} disabled={!isPlayerTurn || !selectedTarget || !active?.technique || active.cosmos < (active.technique?.cost ?? 0)}><Flame size={18} /><span><strong>{active?.technique?.name ?? 'Technique'}</strong><small>Coût : {active?.technique?.cost ?? 0} Cosmos</small></span></button>
+          <button className="combat-action primary-action" onClick={() => selectedTarget && act({ type: 'attack', targetId: selectedTarget.id })} disabled={!isPlayerTurn || !inAttackRange(selectedTarget)}><Swords size={18} /><span><strong>Attaque</strong><small>{selectedTarget && !inAttackRange(selectedTarget) ? 'Cible hors de portée' : 'Dégâts physiques'}</small></span></button>
+          <button className="combat-action" onClick={() => selectedTarget && act({ type: 'technique', targetId: selectedTarget.id })} disabled={!isPlayerTurn || !inTechniqueRange(selectedTarget) || !active?.technique || active.cosmos < (active.technique?.cost ?? 0)}><Flame size={18} /><span><strong>{active?.technique?.name ?? 'Technique'}</strong><small>Coût : {active?.technique?.cost ?? 0} Cosmos</small></span></button>
           <button className="combat-action" onClick={() => act({ type: 'guard' })} disabled={!isPlayerTurn}><Shield size={18} /><span><strong>Garde</strong><small>Réduit les prochains dégâts</small></span></button>
           <button className="combat-action" onClick={() => act({ type: 'focus' })} disabled={!isPlayerTurn || !active || active.cosmos >= active.maxCosmos}><Sparkles size={18} /><span><strong>Concentration</strong><small>Récupère jusqu’à 2 Cosmos</small></span></button>
+          {combat.board && <button className="combat-action" onClick={() => act({ type: 'wait' })} disabled={!isPlayerTurn}><SkipForward size={18} /><span><strong>Fin du tour</strong><small>{combat.moved ? 'Garder la position' : 'Attendre sans agir'}</small></span></button>}
         </div>
         <div className="combat-feedback" aria-live="polite">{feedback}</div>
         {combat.status === 'victory' && <div className="victory-reward" role="status"><Trophy size={16} /> Victoire récompensée : +{VICTORY_XP} XP pour chaque chevalier engagé et +{VICTORY_SHARDS} éclats de Cosmos. {saveWarning ? 'Attention : le navigateur a bloqué la sauvegarde locale.' : 'Progression sauvegardée sur cet appareil.'}</div>}

@@ -58,6 +58,49 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 - [x] Tests du catalogue, du recrutement, de l'escouade, de la préparation du combat et de la migration.
 - [ ] Ajouter des illustrations dédiées pour les nouveaux chevaliers.
 
+## Plateau de combat tactique — `feature/tactical-board`
+
+- [x] Plateau quadrillé (largeur, hauteur, obstacles) et position de chaque unité ; combats sans plateau toujours supportés.
+- [x] Validation du placement : case dans le plateau, hors obstacle, une seule unité par case.
+- [x] Déplacement orthogonal limité par la statistique de mouvement (une fois par activation), contournant obstacles et unités.
+- [x] Portée d'attaque et portée de technique (distance en cases) ; refus des cibles hors de portée.
+- [x] Action « Fin du tour » après un déplacement ou pour attendre.
+- [x] IA tactique : technique ou attaque à portée, sinon rapprochement de la cible la plus proche, sinon attente.
+- [x] Tests du plateau, du déplacement, des portées, du placement et de l'IA.
+- [ ] Grille interactive dans l'arène (tactile et souris) : cases accessibles, cibles à portée, obstacles.
+- [ ] Terrain avancé : couverture, hauteur, cases spéciales.
+
+## Plateau d'aventure et choix multiples — `feature/campaign-board`
+
+- [ ] Plateau de campagne en cases reliées : combat, événement, trésor, repos, boss.
+- [ ] Scènes à choix multiples façon « livre dont vous êtes le héros » (2 ou 3 choix par scène).
+- [ ] Conséquences des choix : combat, récompense, ralliement d'un chevalier, chemin alternatif, fin différente.
+- [ ] Conditions de choix (chevalier dans l'escouade, éclats, choix précédents).
+- [ ] Sauvegarde de la position sur le plateau, des choix faits et des cases visitées (migration de sauvegarde).
+- [ ] Chapitre 1 « Tournoi galactique » avec des textes d'intrigue originaux et un boss.
+- [ ] Tests du parcours, des choix, des conséquences et de la sauvegarde.
+
+## Joueur contre Joueur et coop locale — `feature/local-versus`
+
+- [ ] PvP local sur le même appareil (deux escouades, tour par tour sur le plateau).
+- [ ] Coop locale : deux joueurs contrôlent chacun leurs chevaliers contre l'IA.
+- [ ] Écran de passage de main entre joueurs et choix du mode.
+- [ ] Tests des modes et des conditions de victoire.
+
+## Équipement et ressources — `feature/equipment`
+
+- [ ] Objets d'équipement (bonus de statistiques) et emplacements par chevalier.
+- [ ] Ressources gagnées en combat et en campagne ; inventaire sauvegardé.
+- [ ] Équiper et déséquiper depuis la page Équipe ; effets appliqués en combat.
+- [ ] Tests de l'inventaire, des bonus et de la migration de sauvegarde.
+
+## Musique et contenus additionnels (DLC) — `feature/audio-dlc`
+
+- [ ] Lecteur de musique d'ambiance et d'effets sonores, avec réglage du volume et coupure (mobile compris).
+- [ ] Musiques et sons fournis par l'auteur (fichiers libres de droits ou sous licence).
+- [ ] Format de pack de contenu (DLC) : chapitres, chevaliers et musiques chargés depuis un manifeste validé.
+- [ ] Tests du chargement et de la validation des packs.
+
 ## Progression et collection
 
 - [ ] Modèle de données des chevaliers, armures, techniques et raretés.

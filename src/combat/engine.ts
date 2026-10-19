@@ -1,5 +1,7 @@
+import { attackRange, distance, isInside, isObstacle, isWithinRange, reachableCells, samePosition, techniqueRange } from './board'
 import type {
   ActionResult,
+  Board,
   CombatAction,
   CombatState,
   CombatUnit,
@@ -35,7 +37,27 @@ function assertValidUnit(unit: UnitSetup): void {
   }
 }
 
-export function createCombat(setups: UnitSetup[]): CombatState {
+function assertValidBoard(board: Board, setups: UnitSetup[]): void {
+  if (!Number.isInteger(board.width) || !Number.isInteger(board.height) || board.width < 2 || board.height < 1) {
+    throw new Error('Invalid board size.')
+  }
+  for (const obstacle of board.obstacles) {
+    if (!isInside(board, obstacle)) throw new Error('Obstacle outside the board.')
+  }
+  const occupied: { x: number; y: number }[] = []
+  for (const unit of setups) {
+    const position = unit.position
+    if (!position || !isInside(board, position)) throw new Error(`Unit ${unit.id} needs a position on the board.`)
+    if (isObstacle(board, position)) throw new Error(`Unit ${unit.id} is placed on an obstacle.`)
+    if (occupied.some((cell) => samePosition(cell, position))) throw new Error(`Two units share a cell at ${position.x},${position.y}.`)
+    occupied.push(position)
+    for (const [name, value] of Object.entries({ move: unit.move, range: unit.range, techniqueRange: unit.technique?.range })) {
+      if (value !== undefined && (!Number.isInteger(value) || value < 0)) throw new Error(`Invalid ${name} for ${unit.id}.`)
+    }
+  }
+}
+
+export function createCombat(setups: UnitSetup[], board?: Board): CombatState {
   if (setups.length < 2) throw new Error('Combat requires at least two units.')
   const ids = new Set<string>()
   for (const unit of setups) {
@@ -47,13 +69,20 @@ export function createCombat(setups: UnitSetup[]): CombatState {
   if (!teams.has('player') || !teams.has('enemy')) throw new Error('Combat requires player and enemy teams.')
   if (!setups.some((unit) => unit.team === 'player' && unit.hp > 0)) throw new Error('Player team needs a living unit.')
   if (!setups.some((unit) => unit.team === 'enemy' && unit.hp > 0)) throw new Error('Enemy team needs a living unit.')
+  if (board) assertValidBoard(board, setups)
 
-  const units: CombatUnit[] = setups.map((unit) => ({ ...unit, technique: unit.technique ? { ...unit.technique } : undefined, guarding: false }))
+  const units: CombatUnit[] = setups.map((unit) => ({
+    ...unit,
+    technique: unit.technique ? { ...unit.technique } : undefined,
+    position: unit.position ? { ...unit.position } : undefined,
+    guarding: false,
+  }))
   const turnOrder = [...units]
     .sort((a, b) => b.speed - a.speed || setups.findIndex((unit) => unit.id === a.id) - setups.findIndex((unit) => unit.id === b.id))
     .map((unit) => unit.id)
 
-  return { units, turnOrder, activeIndex: 0, round: 1, status: 'ongoing', winner: null, log: [] }
+  const combatBoard = board ? { ...board, obstacles: board.obstacles.map((cell) => ({ ...cell })) } : undefined
+  return { units, turnOrder, activeIndex: 0, round: 1, status: 'ongoing', winner: null, log: [], board: combatBoard, moved: false }
 }
 
 export function getActiveUnit(state: CombatState): CombatUnit | null {
@@ -87,7 +116,7 @@ function finishOrAdvance(state: CombatState): CombatState {
     }
     const nextId = state.turnOrder[nextIndex]
     if (state.units.some((unit) => unit.id === nextId && unit.hp > 0)) {
-      return { ...state, activeIndex: nextIndex, round: state.round + (wrapped ? 1 : 0) }
+      return { ...state, activeIndex: nextIndex, round: state.round + (wrapped ? 1 : 0), moved: false }
     }
   }
   return state
@@ -112,7 +141,18 @@ export function performAction(state: CombatState, actorId: string, action: Comba
   if (!actor || actor.id !== actorId) return { ok: false, error: 'It is not this unit\'s turn.', state }
 
   let next: CombatState
-  if (action.type === 'guard') {
+  if (action.type === 'move') {
+    if (!state.board) return { ok: false, error: 'Aucun plateau : déplacement impossible.', state }
+    if (state.moved) return { ok: false, error: 'Ce chevalier s’est déjà déplacé ce tour-ci.', state }
+    if (!reachableCells(state, actor.id).some((cell) => samePosition(cell, action.to))) {
+      return { ok: false, error: 'Case hors de portée de déplacement.', state }
+    }
+    next = updateUnit(state, { ...actor, position: { ...action.to } })
+    next = appendLog({ ...next, moved: true }, actor, action, `${actor.name} se déplace en ${action.to.x + 1}-${action.to.y + 1}.`)
+    return { ok: true, state: next }
+  } else if (action.type === 'wait') {
+    next = appendLog(state, actor, action, `${actor.name} termine son tour.`)
+  } else if (action.type === 'guard') {
     next = updateUnit(state, { ...actor, guarding: true })
     next = appendLog(next, actor, action, `${actor.name} se met en garde.`)
   } else if (action.type === 'focus') {
@@ -124,6 +164,9 @@ export function performAction(state: CombatState, actorId: string, action: Comba
     const target = state.units.find((unit) => unit.id === targetId)
     if (!target || target.hp <= 0) return { ok: false, error: 'Target is missing or already defeated.', state }
     if (target.team === actor.team) return { ok: false, error: 'You cannot attack an ally.', state }
+
+    const range = action.type === 'attack' ? attackRange(actor) : techniqueRange(actor)
+    if (!isWithinRange(state, actor, target, range)) return { ok: false, error: 'Cible hors de portée.', state }
 
     if (action.type === 'attack') {
       next = damageTarget(state, actor, target, actor.attack, action)
@@ -145,16 +188,46 @@ export function performAction(state: CombatState, actorId: string, action: Comba
   return { ok: true, state: next }
 }
 
-/** Simple deterministic enemy policy for the first playable prototype. */
+function pickTarget(targets: CombatUnit[]): CombatUnit | undefined {
+  return [...targets].sort((a, b) => a.hp - b.hp || a.id.localeCompare(b.id))[0]
+}
+
+/**
+ * Deterministic tactical policy usable for any team: strike the weakest foe in range
+ * (technique first when affordable), otherwise close in on the nearest foe, otherwise end the turn.
+ */
+export function chooseTacticalAction(state: CombatState, actorId: string): CombatAction | null {
+  if (state.status !== 'ongoing') return null
+  const actor = state.units.find((unit) => unit.id === actorId && unit.hp > 0)
+  if (!actor) return null
+  const alreadyMoved = state.moved && getActiveUnit(state)?.id === actorId
+  const foes = state.units.filter((unit) => unit.team !== actor.team && unit.hp > 0)
+  if (foes.length === 0) return null
+
+  const technique = actor.technique
+  if (technique && technique.power > 0 && actor.cosmos >= technique.cost) {
+    const target = pickTarget(foes.filter((foe) => isWithinRange(state, actor, foe, techniqueRange(actor))))
+    if (target) return { type: 'technique', targetId: target.id }
+  }
+  const target = pickTarget(foes.filter((foe) => isWithinRange(state, actor, foe, attackRange(actor))))
+  if (target) return { type: 'attack', targetId: target.id }
+
+  if (state.board && actor.position && !alreadyMoved) {
+    const origin = actor.position
+    const nearest = [...foes].sort((a, b) =>
+      distance(origin, a.position!) - distance(origin, b.position!) || a.hp - b.hp || a.id.localeCompare(b.id))[0]
+    const goal = nearest.position!
+    const best = reachableCells(state, actor.id)
+      .map((cell) => ({ cell, gap: distance(cell, goal) }))
+      .sort((a, b) => a.gap - b.gap || a.cell.y - b.cell.y || a.cell.x - b.cell.x)[0]
+    if (best && best.gap < distance(origin, goal)) return { type: 'move', to: best.cell }
+  }
+  return { type: 'wait' }
+}
+
+/** Simple deterministic enemy policy. */
 export function chooseAiAction(state: CombatState, actorId: string): CombatAction | null {
   const actor = state.units.find((unit) => unit.id === actorId && unit.hp > 0)
   if (!actor || actor.team !== 'enemy' || state.status !== 'ongoing') return null
-  const target = state.units
-    .filter((unit) => unit.team !== actor.team && unit.hp > 0)
-    .sort((a, b) => a.hp - b.hp || a.id.localeCompare(b.id))[0]
-  if (!target) return null
-  if (actor.technique && actor.cosmos >= actor.technique.cost && actor.technique.power > 0) {
-    return { type: 'technique', targetId: target.id }
-  }
-  return { type: 'attack', targetId: target.id }
+  return chooseTacticalAction(state, actorId)
 }

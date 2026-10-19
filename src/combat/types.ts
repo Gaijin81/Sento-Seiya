@@ -5,6 +5,16 @@ export type Technique = {
   name: string
   cost: number
   power: number
+  /** Board range in cells; defaults to the unit's attack range. */
+  range?: number
+}
+
+export type Position = { x: number; y: number }
+
+export type Board = {
+  width: number
+  height: number
+  obstacles: Position[]
 }
 
 export type CombatUnit = {
@@ -20,6 +30,11 @@ export type CombatUnit = {
   maxCosmos: number
   technique?: Technique
   guarding: boolean
+  position?: Position
+  /** Cells the unit may move per activation on a board. */
+  move?: number
+  /** Basic attack range in cells on a board. */
+  range?: number
 }
 
 export type UnitSetup = Omit<CombatUnit, 'guarding'>
@@ -29,6 +44,8 @@ export type CombatAction =
   | { type: 'technique'; targetId: string }
   | { type: 'guard' }
   | { type: 'focus' }
+  | { type: 'move'; to: Position }
+  | { type: 'wait' }
 
 export type CombatLogEntry = {
   round: number
@@ -45,6 +62,10 @@ export type CombatState = {
   status: CombatStatus
   winner: Team | null
   log: CombatLogEntry[]
+  /** Present for tactical board combats; absent for legacy duels without positions. */
+  board?: Board
+  /** Whether the active unit already moved during its activation. */
+  moved: boolean
 }
 
 export type ActionResult =

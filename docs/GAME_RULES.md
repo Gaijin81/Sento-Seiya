@@ -20,11 +20,20 @@ Ce document fixe une première base de règles pour le prototype. Les valeurs nu
 - Les combats se déroulent au tour par tour.
 - Au début d'un tour, les unités encore en état de combattre sont classées par initiative décroissante. En cas d'égalité, la vitesse la plus élevée agit d'abord; si l'égalité persiste, l'ordre stable de l'équipe tranche.
 - À son activation, une unité peut effectuer une action principale : attaque, technique, garde ou concentration.
-- Le déplacement sera ajouté avec la carte tactique; tant qu'il n'est pas implémenté, il ne doit pas être présenté comme jouable.
+- Sur un plateau, l'unité active peut aussi se déplacer **une fois** avant son action principale ; « Fin du tour » termine l'activation sans action principale.
 - Une action valide met à jour l'état du combat de manière déterministe. Les règles métier ne doivent pas dépendre de l'interface.
 - Une unité à 0 PV ou moins est mise hors combat et ne reçoit plus de tour.
 - Le combat se termine lorsque tous les alliés ou tous les ennemis sont hors combat, ou lorsque l'objectif de mission est rempli.
 - Une mission peut ajouter des objectifs spécifiques, comme survivre un nombre de tours ou protéger un allié.
+
+## 3 bis. Plateau tactique
+
+- Le plateau est une grille (7 × 5 cases dans l'arène du Sanctuaire) avec des obstacles infranchissables (piliers).
+- Chaque unité occupe une case. Au départ, une case doit être dans la grille, hors obstacle et libre ; sinon la création du combat est refusée.
+- Déplacement : pas orthogonaux, jusqu'à la statistique **Mouvement** (3 par défaut), sans traverser obstacles, unités ni bords. La distance se calcule en pas (distance de Manhattan).
+- Portée : une attaque de base touche une cible à distance ≤ **Portée** (1 par défaut, corps à corps). Une technique a sa propre portée (Seiya 2, Shiryu 1, Hyoga 3, Jabu 1, Shun 3, Ikki 2). Une cible hors de portée est refusée sans modifier l'état.
+- Les combats sans plateau (duels historiques) restent valides : pas de position, pas de déplacement, toutes les cibles sont à portée.
+- Interface : touche une case dorée pour te déplacer, touche un adversaire pour le cibler ; les adversaires à portée sont entourés de rouge.
 
 ## 4. Statistiques
 
@@ -60,6 +69,12 @@ L'IA doit être déterministe pour les tests, avec une stratégie simple :
 2. Utiliser une technique si elle est disponible et permet une action légale utile.
 3. Sinon, effectuer une attaque de base.
 4. Si aucune cible n'est disponible, laisser la résolution du combat constater la victoire.
+
+Sur un plateau, l'IA tactique :
+1. lance sa technique si elle a assez de Cosmos et qu'une cible est à portée ;
+2. sinon attaque une cible à portée ;
+3. sinon, si elle ne s'est pas encore déplacée, avance vers l'adversaire le plus proche (case la plus proche de lui, égalités tranchées par ligne puis colonne), puis rejoue ;
+4. sinon termine son tour.
 
 Une future IA plus élaborée pourra évaluer les soins, la garde, les synergies, les objectifs et le terrain.
 
