@@ -79,3 +79,13 @@ button.battle-unit.enemy:disabled{cursor:default}
 @media(max-width:1100px){.combat-action-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.battlefield{gap:8px}.battle-unit{padding:11px 8px;gap:7px}.battle-avatar{width:34px;height:34px;font-size:19px}.battle-unit-name{align-items:flex-start;flex-direction:column;gap:3px}.battle-unit-name span{text-align:left}}
 @media(max-width:700px){.combat-title-row{align-items:flex-start}.combat-title-row h1{font-size:29px}.battlefield{grid-template-columns:minmax(0,1fr)}.battle-divider{flex-direction:row;height:20px}.battle-divider i{height:1px;width:auto;flex:1;background:linear-gradient(90deg,transparent,#d8b66b55,transparent)}.battle-side-heading{font-size:9px}.battle-unit-name{flex-direction:row;align-items:center}.battle-unit{padding:12px}.battle-avatar{width:40px;height:40px}.combat-action-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.combat-controls,.combat-log{padding:14px}.control-hint{display:none}}
 @media(max-width:400px){.combat-action-grid{grid-template-columns:1fr}.combat-action{padding:11px}.round-pill{padding:7px 9px}.combat-status{align-items:flex-start}.status-tag{margin-left:auto}}
+
+
+/* Persistent progression and victory reward */
+.progression-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px;padding:11px 14px;border:1px solid #d8b66b24;border-radius:9px;background:#d8b66b08;color:#9da7bd;font-size:8px;letter-spacing:.7px}
+.progression-summary span{display:flex;align-items:center;gap:7px}
+.progression-summary svg{color:var(--gold)}
+.progression-summary strong{color:#f0dba7;font-size:11px;letter-spacing:0}
+.victory-reward{display:flex;align-items:center;gap:9px;margin-top:13px;padding:12px;border:1px solid #8bd9bd3a;border-radius:8px;background:#8bd9bd0d;color:#a5e7ca;font-size:10px;line-height:1.5}
+.victory-reward svg{flex-shrink:0}
+@media(max-width:400px){.progression-summary{align-items:flex-start;flex-direction:column}}
