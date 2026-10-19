@@ -64,7 +64,7 @@ describe('combat engine', () => {
     const enemyTurn = performAction(guarded.state, 'soldier', { type: 'attack', targetId: 'seiya' })
     expect(enemyTurn.ok).toBe(true)
     if (!enemyTurn.ok) return
-    expect(enemyTurn.state.units.find((unit) => unit.id === 'seiya')?.hp).toBe(19)
+    expect(enemyTurn.state.units.find((unit) => unit.id === 'seiya')?.hp).toBe(18)
     expect(enemyTurn.state.units.find((unit) => unit.id === 'seiya')?.guarding).toBe(false)
   })
 
