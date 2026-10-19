@@ -1,7 +1,10 @@
-import type { Board, CombatState, CombatUnit, Position } from './types'
+import type { Board, CombatState, CombatUnit, Position, TerrainKind } from './types'
 
 export const DEFAULT_MOVE = 3
 export const DEFAULT_RANGE = 1
+export const COVER_REDUCTION = 2
+export const HEIGHT_RANGE_BONUS = 1
+export const TERRAIN_LABELS: Record<TerrainKind, string> = { cover: 'couverture', height: 'hauteur', cosmos: 'source de Cosmos' }
 
 export function samePosition(a: Position, b: Position): boolean {
   return a.x === b.x && a.y === b.y
@@ -21,6 +24,16 @@ export function isObstacle(board: Board, position: Position): boolean {
   return board.obstacles.some((obstacle) => samePosition(obstacle, position))
 }
 
+export function terrainAt(board: Board | undefined, position: Position | undefined): TerrainKind | undefined {
+  if (!board || !position) return undefined
+  return board.terrain?.find((cell) => samePosition(cell, position))?.kind
+}
+
+/** Extra range granted by standing on high ground. */
+export function rangeBonus(state: CombatState, unit: CombatUnit): number {
+  return terrainAt(state.board, unit.position) === 'height' ? HEIGHT_RANGE_BONUS : 0
+}
+
 export function unitAt(state: CombatState, position: Position): CombatUnit | undefined {
   return state.units.find((unit) => unit.hp > 0 && unit.position && samePosition(unit.position, position))
 }
@@ -37,7 +50,7 @@ export function techniqueRange(unit: CombatUnit): number {
 export function isWithinRange(state: CombatState, actor: CombatUnit, target: CombatUnit, range: number): boolean {
   if (!state.board) return true
   if (!actor.position || !target.position) return false
-  return distance(actor.position, target.position) <= range
+  return distance(actor.position, target.position) <= range + rangeBonus(state, actor)
 }
 
 const STEPS: Position[] = [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }]

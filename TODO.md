@@ -68,7 +68,8 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 - [x] IA tactique : technique ou attaque à portée, sinon rapprochement de la cible la plus proche, sinon attente.
 - [x] Tests du plateau, du déplacement, des portées, du placement et de l'IA.
 - [x] Grille interactive dans l'arène (tactile et souris) : cases accessibles, cibles à portée, obstacles.
-- [ ] Terrain avancé : couverture, hauteur, cases spéciales.
+- [x] Terrain avancé : couverture (−2 dégâts subis), hauteur (+1 portée d'attaque et de technique), sources de Cosmos (+1 Cosmos en s'y arrêtant), symétriques dans l'arène.
+- [ ] IA qui recherche activement la couverture et la hauteur.
 
 ## Plateau d'aventure et choix multiples — `feature/campaign-board`
 

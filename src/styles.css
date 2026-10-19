@@ -202,3 +202,13 @@ button.battle-unit.enemy:disabled{cursor:default}
 .treasure-item.rarity-legendary{border-color:#f5c45e88;box-shadow:0 0 22px #f5c45e1f}
 .treasure-item.rarity-legendary h3{color:var(--gold)}
 .treasure-item.undiscovered{opacity:.6}
+.board-cell{position:relative}
+.terrain-mark{position:absolute;top:3px;left:3px;display:flex;opacity:.75;pointer-events:none}
+.cell-cover{background-image:linear-gradient(135deg,#7fb4ff14,transparent)}
+.cell-cover .terrain-mark{color:#9cc4ff}
+.cell-height{background-image:linear-gradient(135deg,#d6a85a1c,transparent)}
+.cell-height .terrain-mark{color:var(--gold)}
+.cell-cosmos{background-image:radial-gradient(circle,#b48cff22,transparent 70%)}
+.cell-cosmos .terrain-mark{color:#c9a8ff}
+.terrain-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 0 0;font-size:10px;color:var(--muted)}
+.terrain-legend span{display:inline-flex;align-items:center;gap:4px}
