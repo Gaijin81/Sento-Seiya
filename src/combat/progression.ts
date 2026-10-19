@@ -1,8 +1,11 @@
 import type { CombatState } from './types'
+import { getKnightDefinition, STARTER_KNIGHT_IDS } from './knights'
 
 export const SAVE_KEY = 'sento-seiya-progress'
-export const SAVE_VERSION = 1
+export const SAVE_VERSION = 2
 export const VICTORY_XP = 50
+export const VICTORY_SHARDS = 30
+export const MAX_SQUAD_SIZE = 3
 
 export type KnightProgress = {
   id: string
@@ -16,25 +19,29 @@ export type ProgressionState = {
   version: typeof SAVE_VERSION
   playerXp: number
   victories: number
+  cosmosShards: number
   claimedCombatIds: string[]
   knights: KnightProgress[]
+  squad: string[]
 }
 
 export type StorageLike = Pick<Storage, 'getItem' | 'setItem'>
 
-const startingKnights = [
-  { id: 'seiya', name: 'Seiya' },
-  { id: 'shiryu', name: 'Shiryu' },
-  { id: 'hyoga', name: 'Hyoga' },
-]
+export function createKnightProgress(id: string): KnightProgress {
+  const definition = getKnightDefinition(id)
+  if (!definition) throw new Error(`Unknown knight: ${id}.`)
+  return { id, name: definition.name, level: 1, xp: 0, totalXp: 0 }
+}
 
 export function createInitialProgression(): ProgressionState {
   return {
     version: SAVE_VERSION,
     playerXp: 0,
     victories: 0,
+    cosmosShards: 0,
     claimedCombatIds: [],
-    knights: startingKnights.map((knight) => ({ ...knight, level: 1, xp: 0, totalXp: 0 })),
+    knights: STARTER_KNIGHT_IDS.map(createKnightProgress),
+    squad: [...STARTER_KNIGHT_IDS],
   }
 }
 
@@ -42,43 +49,89 @@ export function xpRequiredForNextLevel(level: number): number {
   return Math.max(1, level) * 100
 }
 
-function isProgressionState(value: unknown): value is ProgressionState {
+const isCount = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value) && value >= 0
+
+function isKnightProgress(value: unknown): value is KnightProgress {
   if (!value || typeof value !== 'object') return false
-  const candidate = value as Partial<ProgressionState>
-  return candidate.version === SAVE_VERSION
-    && Number.isFinite(candidate.playerXp) && (candidate.playerXp ?? -1) >= 0
-    && Number.isFinite(candidate.victories) && (candidate.victories ?? -1) >= 0
+  const knight = value as Partial<KnightProgress>
+  return typeof knight.id === 'string'
+    && typeof knight.name === 'string'
+    && Number.isInteger(knight.level) && (knight.level ?? 0) >= 1
+    && isCount(knight.xp) && isCount(knight.totalXp)
+    && knight.xp < xpRequiredForNextLevel(knight.level!)
+}
+
+type SharedSaveFields = Pick<ProgressionState, 'playerXp' | 'victories' | 'claimedCombatIds' | 'knights'>
+
+function hasSharedFields(candidate: Record<string, unknown>): candidate is SharedSaveFields & Record<string, unknown> {
+  return isCount(candidate.playerXp)
+    && isCount(candidate.victories)
     && Array.isArray(candidate.claimedCombatIds)
     && candidate.claimedCombatIds.every((id) => typeof id === 'string')
     && Array.isArray(candidate.knights)
-    && startingKnights.every((starting) => candidate.knights!.some((knight) =>
-      knight && knight.id === starting.id
-      && typeof knight.name === 'string'
-      && Number.isInteger(knight.level) && knight.level >= 1
-      && Number.isFinite(knight.xp) && knight.xp >= 0
-      && Number.isFinite(knight.totalXp) && knight.totalXp >= 0
-      && knight.xp < xpRequiredForNextLevel(knight.level),
-    ))
+    && candidate.knights.every(isKnightProgress)
+    && STARTER_KNIGHT_IDS.every((id) => (candidate.knights as KnightProgress[]).some((knight) => knight.id === id))
+}
+
+/** Keep only catalog knights, once each, with canonical names. */
+function normalizeKnights(knights: KnightProgress[]): KnightProgress[] {
+  const seen = new Set<string>()
+  return knights.flatMap((knight) => {
+    const definition = getKnightDefinition(knight.id)
+    if (!definition || seen.has(knight.id)) return []
+    seen.add(knight.id)
+    return [{ id: knight.id, name: definition.name, level: knight.level, xp: knight.xp, totalXp: knight.totalXp }]
+  })
+}
+
+function normalizeSquad(squad: unknown, knights: KnightProgress[]): string[] {
+  const owned = new Set(knights.map((knight) => knight.id))
+  const ids = Array.isArray(squad) ? squad.filter((id): id is string => typeof id === 'string' && owned.has(id)) : []
+  const unique = [...new Set(ids)].slice(0, MAX_SQUAD_SIZE)
+  return unique.length > 0 ? unique : STARTER_KNIGHT_IDS.filter((id) => owned.has(id)).slice(0, MAX_SQUAD_SIZE)
+}
+
+export function parseProgression(value: unknown): ProgressionState | null {
+  if (!value || typeof value !== 'object') return null
+  const candidate = value as Record<string, unknown>
+  if (!hasSharedFields(candidate)) return null
+
+  if (candidate.version === 1) {
+    // v1 saves only knew the three starters: grant retroactive shards for past victories.
+    const knights = normalizeKnights(candidate.knights).filter((knight) => STARTER_KNIGHT_IDS.includes(knight.id))
+    return {
+      version: SAVE_VERSION,
+      playerXp: candidate.playerXp,
+      victories: candidate.victories,
+      cosmosShards: candidate.victories * VICTORY_SHARDS,
+      claimedCombatIds: [...new Set(candidate.claimedCombatIds)],
+      knights,
+      squad: normalizeSquad(STARTER_KNIGHT_IDS, knights),
+    }
+  }
+
+  if (candidate.version === SAVE_VERSION && isCount(candidate.cosmosShards)) {
+    const knights = normalizeKnights(candidate.knights)
+    return {
+      version: SAVE_VERSION,
+      playerXp: candidate.playerXp,
+      victories: candidate.victories,
+      cosmosShards: candidate.cosmosShards,
+      claimedCombatIds: [...new Set(candidate.claimedCombatIds)],
+      knights,
+      squad: normalizeSquad(candidate.squad, knights),
+    }
+  }
+
+  return null
 }
 
 export function loadProgression(storage: StorageLike): ProgressionState {
   try {
     const raw = storage.getItem(SAVE_KEY)
     if (!raw) return createInitialProgression()
-    const parsed: unknown = JSON.parse(raw)
-    if (isProgressionState(parsed)) {
-      // Keep the known roster canonical while retaining valid progress values.
-      return {
-        ...parsed,
-        claimedCombatIds: [...new Set(parsed.claimedCombatIds)],
-        knights: startingKnights.map((starting) => {
-          const saved = parsed.knights.find((knight) => knight.id === starting.id)!
-          return { ...starting, level: saved.level, xp: saved.xp, totalXp: saved.totalXp }
-        }),
-      }
-    }
     // Unknown versions and malformed saves safely start from a clean schema.
-    return createInitialProgression()
+    return parseProgression(JSON.parse(raw)) ?? createInitialProgression()
   } catch {
     return createInitialProgression()
   }
@@ -88,15 +141,19 @@ export function saveProgression(storage: StorageLike, progression: ProgressionSt
   storage.setItem(SAVE_KEY, JSON.stringify(progression))
 }
 
+/** Rewards the player and the knights that fought (the current squad by default). */
 export function awardVictoryXp(
   progression: ProgressionState,
   combatId: string,
   combat: Pick<CombatState, 'status' | 'winner'>,
+  participantIds: string[] = progression.squad,
 ): ProgressionState {
   if (!combatId.trim() || combat.status !== 'victory' || combat.winner !== 'player') return progression
   if (progression.claimedCombatIds.includes(combatId)) return progression
 
+  const participants = new Set(participantIds)
   const knights = progression.knights.map((knight) => {
+    if (!participants.has(knight.id)) return knight
     let level = knight.level
     let xp = knight.xp + VICTORY_XP
     while (xp >= xpRequiredForNextLevel(level)) {
@@ -110,6 +167,7 @@ export function awardVictoryXp(
     ...progression,
     playerXp: progression.playerXp + VICTORY_XP,
     victories: progression.victories + 1,
+    cosmosShards: progression.cosmosShards + VICTORY_SHARDS,
     claimedCombatIds: [...progression.claimedCombatIds, combatId],
     knights,
   }

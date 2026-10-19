@@ -89,3 +89,19 @@ button.battle-unit.enemy:disabled{cursor:default}
 .victory-reward{display:flex;align-items:center;gap:9px;margin-top:13px;padding:12px;border:1px solid #8bd9bd3a;border-radius:8px;background:#8bd9bd0d;color:#a5e7ca;font-size:10px;line-height:1.5}
 .victory-reward svg{flex-shrink:0}
 @media(max-width:400px){.progression-summary{align-items:flex-start;flex-direction:column}}
+
+.knight-avatar.violet,.battle-avatar.violet{color:var(--violet);background:#b7a1ff0b;border-color:#b7a1ff28}
+.knight-avatar.gold,.battle-avatar.gold{color:var(--gold);background:#e5bd720b;border-color:#e5bd7228}
+.battle-avatar.coral{color:var(--coral);background:#ff9b8f0b;border-color:#ff9b8f28}
+.battle-avatar.jade{color:var(--jade);background:#8bd9bd0b;border-color:#8bd9bd28}
+.battle-avatar.ice{color:var(--ice);background:#92c8ff0b;border-color:#92c8ff28}
+.knight-portrait.violet{color:var(--violet);background:radial-gradient(ellipse at 50% 50%,#b7a1ff18,transparent 65%),#171d30}
+.knight-portrait.gold{color:var(--gold);background:radial-gradient(ellipse at 50% 50%,#e5bd7218,transparent 65%),#171d30}
+.knight-detail.in-squad{border-color:#dfb45b44;box-shadow:0 0 0 1px #dfb45b1c inset}
+.recruit-card.locked,.recruit-card.insufficient{opacity:.72}
+.secondary-button:disabled{opacity:.5;cursor:not-allowed}
+.squad-summary{margin:0 0 18px}
+.recruit-heading{margin-top:34px}
+.prep-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.prep-buttons{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.prep-buttons .secondary-button,.prep-buttons .primary-button{margin-top:0}

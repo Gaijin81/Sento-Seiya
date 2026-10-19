@@ -65,24 +65,34 @@ Une future IA plus élaborée pourra évaluer les soins, la garde, les synergies
 
 ## 6 bis. Prototype jouable de l'arène
 
-L'arène de démonstration propose une équipe de trois chevaliers contre deux adversaires. Les valeurs et techniques utilisées sont provisoires et servent à valider la boucle de combat, pas l'équilibrage final.
+L'arène de démonstration oppose l'escouade du joueur (1 à 3 chevaliers) à deux adversaires. Un écran de préparation affiche les chevaliers engagés, leurs statistiques au niveau actuel et les adversaires attendus. Les valeurs et techniques utilisées sont provisoires et servent à valider la boucle de combat, pas l'équilibrage final.
 
 - L'équipe du joueur agit dans l'ordre d'initiative; chaque chevalier vivant reçoit une activation.
 - Quand tous les chevaliers du joueur ont agi, l'IA résout automatiquement les activations ennemies jusqu'au prochain tour joueur ou à la fin du combat.
 - Le joueur peut sélectionner un adversaire vivant et choisir attaque, technique spéciale, garde ou concentration.
 - Une technique est désactivée si le chevalier ne dispose pas du Cosmos nécessaire.
 - Le journal affiche les actions résolues; la partie affiche victoire ou défaite quand une équipe n'a plus de combattants actifs.
-- Après la fin du combat, le joueur peut recommencer. Aucun XP ni récompense n'est encore attribué, et l'état de combat n'est pas sauvegardé après rechargement.
+- Après la fin du combat, le joueur peut recommencer ou revenir à la préparation. L'état d'un combat en cours n'est pas sauvegardé après rechargement.
 
 ## 6 ter. Progression et sauvegarde du prototype
 
-- Une victoire validée par le moteur attribue 50 XP au profil du joueur et 50 XP à chacun des trois chevaliers de départ.
+- Une victoire validée par le moteur attribue 50 XP au profil du joueur, 50 XP à chaque chevalier engagé dans le combat et 30 éclats de Cosmos.
 - Chaque chevalier commence au niveau 1. Le seuil pour passer du niveau (N) au suivant est de (100 × N) XP; l'XP excédentaire est conservée après la montée de niveau.
 - Les défaites et les combats encore en cours ne donnent aucune récompense.
 - Un identifiant de combat empêche d'attribuer plusieurs fois la récompense d'une même victoire dans la sauvegarde.
 - La progression est stockée localement dans le navigateur sous une clé versionnée. Un JSON invalide ou une version inconnue est ignoré et une progression initiale est créée.
-- La sauvegarde locale n'est pas une sauvegarde cloud : elle est liée au navigateur et peut disparaître si les données du site sont effacées. La synchronisation multi-appareils et la migration entre versions restent à développer.
+- La sauvegarde locale n'est pas une sauvegarde cloud : elle est liée au navigateur et peut disparaître si les données du site sont effacées. Les sauvegardes v1 sont migrées automatiquement en v2. La synchronisation multi-appareils reste à développer.
 - La progression est une donnée de prototype côté client; elle ne doit pas être considérée comme fiable pour un futur PvP ou classement en ligne.
+
+## 6 quater. Recrutement et escouade
+
+- Seiya, Shiryu et Hyoga sont possédés dès le départ. Jabu (30 éclats), Shun (60 éclats, 1 victoire) et Ikki (120 éclats, 3 victoires) sont recrutables depuis la page Équipe.
+- Un recrutement exige d'avoir assez d'éclats et de victoires; un chevalier ne peut être recruté qu'une fois et commence au niveau 1.
+- Un chevalier recruté rejoint automatiquement l'escouade s'il reste une place.
+- L'escouade compte de 1 à 3 chevaliers possédés. Elle est sauvegardée localement avec le reste de la progression.
+- Chaque niveau au-delà du premier ajoute +4 PV et +1 attaque; la défense gagne +1 tous les deux niveaux. Vitesse et Cosmos ne changent pas.
+- Lors de la migration d'une sauvegarde v1, le joueur reçoit 30 éclats par victoire déjà obtenue et l'escouade contient les trois chevaliers de départ.
+- Les valeurs de coût et de statistiques sont provisoires et servent à valider la boucle, pas l'équilibrage final.
 
 ## 7. Modes prévus
 
