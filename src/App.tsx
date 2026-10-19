@@ -62,7 +62,7 @@ export default function App() {
   const [notice, setNotice] = useState('')
   const [progression, setProgression] = useState<ProgressionState>(() => {
     if (typeof window === 'undefined') return createInitialProgression()
-    return loadProgression(window.localStorage)
+    try { return loadProgression(window.localStorage) } catch { return createInitialProgression() }
   })
 
   const startCampaign = () => {
