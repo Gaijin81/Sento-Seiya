@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { createInitialProgression, loadProgression, MAX_SQUAD_SIZE, saveProgression, xpRequiredForNextLevel, type ProgressionState } from './combat/progression'
-import { getKnightDefinition, knightStatsAtLevel, type KnightDefinition } from './combat/knights'
+import { VICTORY_STARDUST, createInitialProgression, loadProgression, MAX_SQUAD_SIZE, saveProgression, xpRequiredForNextLevel, type ProgressionState } from './combat/progression'
+import { createKnightUnit, getKnightDefinition, knightStatsAtLevel, type KnightDefinition } from './combat/knights'
 import { getRecruitableKnights, getRecruitStatus, recruitKnight, toggleSquadMember, type ProgressionResult } from './combat/recruitment'
 import CombatArena from './combat/CombatArena'
+import { applyEquipment, availableCount, bonusLabel, equipItem, EQUIPMENT_CATALOG, EQUIPMENT_SLOTS, forgeItem, getItem, ownedCount, SLOT_LABELS, unequipItem } from './combat/equipment'
 import CampaignBoard from './campaign/CampaignBoard'
 import LocalVersus from './versus/LocalVersus'
 import type { LocalMode } from './versus/match'
@@ -13,6 +14,7 @@ import type { CampaignState } from './campaign/types'
 import {
   Swords, Shield, Sparkles, Users, Map, ScrollText, Trophy,
   ChevronRight, Flame, Star, CircleHelp, Menu, X, Heart, Zap,
+  Hammer,
 } from 'lucide-react'
 
 type Campaign = {
@@ -262,9 +264,9 @@ export default function App() {
             <div className="eyebrow">TES ALLIÉS · TON DESTIN</div>
             <h1>Les chevaliers</h1>
             <p className="page-intro">Compose une escouade de {MAX_SQUAD_SIZE} chevaliers maximum et recrute de nouveaux alliés avec les éclats de Cosmos gagnés en combat.</p>
-            <div className="progression-summary squad-summary" aria-label="Ressources de l'équipe"><span><Users size={14} /> ESCOUADE <strong>{progression.squad.length}/{MAX_SQUAD_SIZE}</strong></span><span><Sparkles size={14} /> ÉCLATS DE COSMOS <strong>{progression.cosmosShards}</strong></span><span><Trophy size={14} /> VICTOIRES <strong>{progression.victories}</strong></span></div>
+            <div className="progression-summary squad-summary" aria-label="Ressources de l'équipe"><span><Users size={14} /> ESCOUADE <strong>{progression.squad.length}/{MAX_SQUAD_SIZE}</strong></span><span><Sparkles size={14} /> ÉCLATS DE COSMOS <strong>{progression.cosmosShards}</strong></span><span><Hammer size={14} /> POUSSIÈRES D’ÉTOILES <strong>{progression.stardust}</strong></span><span><Trophy size={14} /> VICTOIRES <strong>{progression.victories}</strong></span></div>
             <div className="roster-page-grid">{ownedKnights.map(({ knight, definition }) => {
-              const stats = knightStatsAtLevel(definition, knight.level)
+              const stats = applyEquipment(createKnightUnit(definition, knight.level), progression.equipment[knight.id])
               const inSquad = progression.squad.includes(knight.id)
               return (
                 <article className={`knight-detail ${inSquad ? 'in-squad' : ''}`} key={knight.id}>
@@ -275,12 +277,37 @@ export default function App() {
                   <div className="detail-stat"><span>Niveau</span><strong>{knight.level}</strong></div>
                   <div className="mini-track"><span style={{ width: `${knight.xp / xpRequiredForNextLevel(knight.level) * 100}%` }} /></div>
                   <div className="detail-stat"><span>XP</span><strong>{knight.xp} / {xpRequiredForNextLevel(knight.level)}</strong></div>
-                  <div className="detail-stat"><span>PV · ATQ · DÉF · VIT</span><strong>{stats.hp} · {stats.attack} · {stats.defense} · {stats.speed}</strong></div>
+                  <div className="detail-stat"><span>PV · ATQ · DÉF · VIT</span><strong>{stats.maxHp} · {stats.attack} · {stats.defense} · {stats.speed}</strong></div>
                   <div className="detail-stat"><span>{definition.technique.name}</span><strong>{definition.technique.cost} Cosmos</strong></div>
+                  <div className="gear-slots">{EQUIPMENT_SLOTS.map((slot) => {
+                    const equipped = progression.equipment[knight.id]?.[slot]
+                    const options = EQUIPMENT_CATALOG.filter((item) => item.slot === slot && (item.id === equipped || availableCount(progression, item.id) > 0))
+                    return (
+                      <label className="gear-slot" key={slot}>
+                        <span>{SLOT_LABELS[slot]}</span>
+                        <select value={equipped ?? ''} aria-label={`${SLOT_LABELS[slot]} de ${definition.name}`} onChange={(event) => { const itemId = event.target.value; applyResult(itemId ? equipItem(progression, knight.id, itemId) : unequipItem(progression, knight.id, slot), itemId ? `${definition.name} équipe ${getItem(itemId)?.name}.` : `${definition.name} retire son ${SLOT_LABELS[slot].toLowerCase()}.`) }}>
+                          <option value="">— Aucun —</option>
+                          {options.map((item) => <option key={item.id} value={item.id}>{item.name} ({bonusLabel(item.bonus)})</option>)}
+                        </select>
+                      </label>
+                    )
+                  })}</div>
                   <button className="secondary-button" aria-pressed={inSquad} onClick={() => applyResult(toggleSquadMember(progression, knight.id), inSquad ? `${definition.name} quitte l’escouade.` : `${definition.name} rejoint l’escouade.`)}>{inSquad ? 'Retirer de l’escouade' : 'Ajouter à l’escouade'} <ChevronRight size={15} /></button>
                 </article>
               )
             })}</div>
+            <div className="section-heading recruit-heading"><div><div className="eyebrow">FORGE · POUSSIÈRES D’ÉTOILES</div><h2>Équipement</h2></div><span className="log-count"><Hammer size={13} /> {progression.stardust} poussières</span></div>
+            <p className="page-intro">Chaque victoire rapporte {VICTORY_STARDUST} poussières d’étoiles. Forge des objets puis équipe-les (une relique et un talisman par chevalier) : leurs bonus s’appliquent en combat.</p>
+            <div className="forge-grid">{EQUIPMENT_CATALOG.map((item) => (
+              <article className="panel forge-item" key={item.id}>
+                <div className="eyebrow">{SLOT_LABELS[item.slot].toUpperCase()}</div>
+                <h3>{item.name}</h3>
+                <p>{item.description}</p>
+                <strong className="gear-bonus">{bonusLabel(item.bonus)}</strong>
+                <div className="detail-stat"><span>Possédés · libres</span><strong>{ownedCount(progression, item.id)} · {availableCount(progression, item.id)}</strong></div>
+                <button className="secondary-button" disabled={progression.stardust < item.cost} onClick={() => applyResult(forgeItem(progression, item.id), `${item.name} forgé !`)}><Hammer size={14} /> Forger · {item.cost}</button>
+              </article>
+            ))}</div>
             <div className="section-heading recruit-heading"><div><div className="eyebrow">RECRUTEMENT</div><h2>Nouveaux alliés</h2></div><button className="text-button" onClick={() => setActiveSection('Combat')}>Préparer un combat <ChevronRight size={15} /></button></div>
             {recruitable.length === 0 ? <p className="page-intro">Tous les chevaliers disponibles ont rejoint ton équipe.</p> : <div className="roster-page-grid">{recruitable.map((definition: KnightDefinition) => {
               const status = getRecruitStatus(progression, definition)

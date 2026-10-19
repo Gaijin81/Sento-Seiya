@@ -95,10 +95,12 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 
 ## Équipement et ressources — `feature/equipment`
 
-- [ ] Objets d'équipement (bonus de statistiques) et emplacements par chevalier.
-- [ ] Ressources gagnées en combat et en campagne ; inventaire sauvegardé.
-- [ ] Équiper et déséquiper depuis la page Équipe ; effets appliqués en combat.
-- [ ] Tests de l'inventaire, des bonus et de la migration de sauvegarde.
+- [x] 6 objets d'équipement (bonus PV, ATQ, DÉF, VIT, Cosmos max, déplacement, portée de technique) et 2 emplacements par chevalier (relique, talisman).
+- [x] Ressource « poussières d'étoiles » : +10 par victoire, +30 en battant le boss du chapitre 1 ; forge des objets à la page Équipe.
+- [x] Inventaire sauvegardé (plusieurs exemplaires possibles), équiper/déséquiper depuis la page Équipe ; bonus appliqués en combat et dans les statistiques affichées.
+- [x] Sauvegarde v3 avec migration automatique des sauvegardes v1/v2 ; équipements invalides ignorés.
+- [x] Tests de la forge, de l'inventaire, des bonus, du combat et de la migration de sauvegarde.
+- [ ] Objets trouvés en campagne et objets rares (armures d'argent / d'or) après cadrage.
 
 ## Musique et contenus additionnels (DLC) — `feature/audio-dlc`
 

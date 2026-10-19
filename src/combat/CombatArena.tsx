@@ -7,7 +7,7 @@ import { createEncounterCombat, createSquadUnits, DEMO_ENEMIES, playActionAndRes
 import type { Encounter } from '../campaign/types'
 import TacticalBoard, { unitGlyph } from './TacticalBoard'
 import type { CombatAction, CombatState, CombatUnit, Position } from './types'
-import { awardVictoryXp, VICTORY_SHARDS, VICTORY_XP, type ProgressionState } from './progression'
+import { awardVictoryXp, VICTORY_SHARDS, VICTORY_STARDUST, VICTORY_XP, type ProgressionState } from './progression'
 
 type Props = {
   progression: ProgressionState
@@ -129,7 +129,7 @@ export default function CombatArena({ progression, onProgressionChanged, onBack,
           </div>
         </div>
         <div className="combat-controls panel prep-actions">
-          <p className="control-hint">Récompense de victoire : +{VICTORY_XP} XP pour chaque chevalier engagé et +{VICTORY_SHARDS} éclats de Cosmos pour recruter.</p>
+          <p className="control-hint">Récompense de victoire : +{VICTORY_XP} XP pour chaque chevalier engagé et +{VICTORY_SHARDS} éclats de Cosmos pour recruter, +{VICTORY_STARDUST} poussières d’étoiles pour forger.</p>
           <div className="prep-buttons">
             <button className="secondary-button" onClick={onEditSquad}><Users size={15} /> Modifier l’escouade</button>
             <button className="primary-button" onClick={startBattle}><Swords size={16} /> Lancer le combat</button>
@@ -194,7 +194,7 @@ export default function CombatArena({ progression, onProgressionChanged, onBack,
           {combat.board && <button className="combat-action" onClick={() => act({ type: 'wait' })} disabled={!isPlayerTurn}><SkipForward size={18} /><span><strong>Fin du tour</strong><small>{combat.moved ? 'Garder la position' : 'Attendre sans agir'}</small></span></button>}
         </div>
         <div className="combat-feedback" aria-live="polite">{feedback}</div>
-        {combat.status === 'victory' && <div className="victory-reward" role="status"><Trophy size={16} /> Victoire récompensée : +{VICTORY_XP} XP pour chaque chevalier engagé et +{VICTORY_SHARDS} éclats de Cosmos. {saveWarning ? 'Attention : le navigateur a bloqué la sauvegarde locale.' : 'Progression sauvegardée sur cet appareil.'}</div>}
+        {combat.status === 'victory' && <div className="victory-reward" role="status"><Trophy size={16} /> Victoire récompensée : +{VICTORY_XP} XP pour chaque chevalier engagé et +{VICTORY_SHARDS} éclats de Cosmos, +{VICTORY_STARDUST} poussières d’étoiles. {saveWarning ? 'Attention : le navigateur a bloqué la sauvegarde locale.' : 'Progression sauvegardée sur cet appareil.'}</div>}
         {combat.status !== 'ongoing' && <div className="prep-buttons">{onCombatEnd && <button className="primary-button rematch-button" onClick={() => onCombatEnd(combat.status === 'victory')}><ArrowLeft size={16} /> {combat.status === 'victory' ? 'Continuer l’aventure' : 'Battre en retraite'}</button>}<button className="primary-button rematch-button" onClick={startBattle}><RotateCcw size={16} /> Recommencer le combat</button><button className="secondary-button rematch-button" onClick={() => setPhase('preparation')}><Users size={15} /> Retour à la préparation</button></div>}
       </div>
       <div className="panel combat-log"><div className="panel-heading"><div><div className="eyebrow">CHRONIQUE DU COMBAT</div><h2>Journal des actions</h2></div><span className="log-count">{combat.log.length} action(s)</span></div>

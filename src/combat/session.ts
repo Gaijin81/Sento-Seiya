@@ -1,4 +1,5 @@
 import { chooseAiAction, createCombat, getActiveUnit, performAction } from './engine'
+import { applyEquipment } from './equipment'
 import { createKnightUnit, getKnightDefinition } from './knights'
 import type { ProgressionState } from './progression'
 import type { ActionResult, Board, CombatAction, CombatState, Position, UnitSetup } from './types'
@@ -26,7 +27,7 @@ export function createSquadUnits(progression: ProgressionState): UnitSetup[] {
   return progression.squad.flatMap((id) => {
     const definition = getKnightDefinition(id)
     const knight = progression.knights.find((entry) => entry.id === id)
-    return definition && knight ? [createKnightUnit(definition, knight.level)] : []
+    return definition && knight ? [applyEquipment(createKnightUnit(definition, knight.level), progression.equipment[id])] : []
   }).slice(0, PLAYER_SPAWNS.length).map((unit, index) => ({ ...unit, position: { ...PLAYER_SPAWNS[index] } }))
 }
 
