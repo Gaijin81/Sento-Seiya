@@ -74,6 +74,16 @@ L'arène de démonstration propose une équipe de trois chevaliers contre deux a
 - Le journal affiche les actions résolues; la partie affiche victoire ou défaite quand une équipe n'a plus de combattants actifs.
 - Après la fin du combat, le joueur peut recommencer. Aucun XP ni récompense n'est encore attribué, et l'état de combat n'est pas sauvegardé après rechargement.
 
+## 6 ter. Progression et sauvegarde du prototype
+
+- Une victoire validée par le moteur attribue 50 XP au profil du joueur et 50 XP à chacun des trois chevaliers de départ.
+- Chaque chevalier commence au niveau 1. Le seuil pour passer du niveau (N) au suivant est de (100 × N) XP; l'XP excédentaire est conservée après la montée de niveau.
+- Les défaites et les combats encore en cours ne donnent aucune récompense.
+- Un identifiant de combat empêche d'attribuer plusieurs fois la récompense d'une même victoire dans la sauvegarde.
+- La progression est stockée localement dans le navigateur sous une clé versionnée. Un JSON invalide ou une version inconnue est ignoré et une progression initiale est créée.
+- La sauvegarde locale n'est pas une sauvegarde cloud : elle est liée au navigateur et peut disparaître si les données du site sont effacées. La synchronisation multi-appareils et la migration entre versions restent à développer.
+- La progression est une donnée de prototype côté client; elle ne doit pas être considérée comme fiable pour un futur PvP ou classement en ligne.
+
 ## 7. Modes prévus
 
 - **PvE** : le joueur affronte des unités contrôlées par l'IA.

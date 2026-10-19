@@ -1,13 +1,24 @@
 import { useState } from 'react'
-import { ArrowLeft, Crosshair, Flame, Heart, RotateCcw, Shield, Sparkles, Swords, Zap } from 'lucide-react'
+import { ArrowLeft, Crosshair, Flame, Heart, RotateCcw, Shield, Sparkles, Swords, Trophy, Zap } from 'lucide-react'
 import { getActiveUnit } from './engine'
 import { createDemoCombat, playActionAndResolveAi } from './session'
 import type { CombatAction, CombatState } from './types'
+import { awardVictoryXp, createInitialProgression, loadProgression, saveProgression, VICTORY_XP, type ProgressionState } from './progression'
 
-type Props = { onBack: () => void }
+type Props = { onBack: () => void; onProgressionChanged?: (progression: ProgressionState) => void }
 
-export default function CombatArena({ onBack }: Props) {
+function createCombatId(): string {
+  return 'combat-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2)
+}
+
+export default function CombatArena({ onBack, onProgressionChanged }: Props) {
   const [combat, setCombat] = useState<CombatState>(() => createDemoCombat())
+  const [combatId, setCombatId] = useState(() => createCombatId())
+  const [progression, setProgression] = useState<ProgressionState>(() => {
+    if (typeof window === 'undefined') return createInitialProgression()
+    try { return loadProgression(window.localStorage) } catch { return createInitialProgression() }
+  })
+  const [saveWarning, setSaveWarning] = useState(false)
   const [targetId, setTargetId] = useState('black-pega')
   const [feedback, setFeedback] = useState('Choisis une action pour commencer le combat.')
   const active = getActiveUnit(combat)
@@ -26,6 +37,19 @@ export default function CombatArena({ onBack }: Props) {
       return
     }
     setCombat(result.state)
+    if (result.state.status === 'victory') {
+      const rewarded = awardVictoryXp(progression, combatId, result.state)
+      if (rewarded !== progression) {
+        setProgression(rewarded)
+        onProgressionChanged?.(rewarded)
+        try {
+          if (typeof window !== 'undefined') saveProgression(window.localStorage, rewarded)
+          setSaveWarning(false)
+        } catch {
+          setSaveWarning(true)
+        }
+      }
+    }
     const latest = result.state.log[result.state.log.length - 1]
     setFeedback(result.state.status === 'victory'
       ? 'Victoire ! Tous les adversaires sont hors combat.'
@@ -36,6 +60,7 @@ export default function CombatArena({ onBack }: Props) {
 
   const reset = () => {
     setCombat(createDemoCombat())
+    setCombatId(createCombatId())
     setTargetId('black-pega')
     setFeedback('Nouveau combat : choisis une action.')
   }
@@ -48,6 +73,7 @@ export default function CombatArena({ onBack }: Props) {
         <div><h1>Le réveil du Cosmos</h1><p className="page-intro">Élimine les adversaires. Les tours de l’IA se résolvent automatiquement.</p></div>
         <div className="round-pill">TOUR <strong>{combat.round}</strong></div>
       </div>
+      <div className="progression-summary" aria-label="Progression sauvegardée"><span><Sparkles size={14} /> EXPÉRIENCE DU JOUEUR <strong>{progression.playerXp} XP</strong></span><span>VICTOIRES <strong>{progression.victories}</strong></span></div>
       <div className="combat-status" role="status"><Sparkles size={17} /><span>{combat.status === 'victory' ? 'Victoire — le Sanctuaire reconnaît ta force.' : combat.status === 'defeat' ? 'Défaite — retente ta chance.' : active ? 'Au tour de ' + active.name + (active.team === 'enemy' ? ' (IA).' : '.') : 'Combat terminé.'}</span><span className={'status-tag ' + combat.status}>{combat.status === 'ongoing' ? 'EN COURS' : combat.status === 'victory' ? 'VICTOIRE' : 'DÉFAITE'}</span></div>
       <div className="battlefield">
         <div className="battle-side">
@@ -92,6 +118,7 @@ export default function CombatArena({ onBack }: Props) {
           <button className="combat-action" onClick={() => act({ type: 'focus' })} disabled={!isPlayerTurn || !active || active.cosmos >= active.maxCosmos}><Sparkles size={18} /><span><strong>Concentration</strong><small>Récupère jusqu’à 2 Cosmos</small></span></button>
         </div>
         <div className="combat-feedback" aria-live="polite">{feedback}</div>
+        {combat.status === 'victory' && <div className="victory-reward" role="status"><Trophy size={16} /> Victoire récompensée : +{VICTORY_XP} XP pour chacun de tes chevaliers. {saveWarning ? 'Attention : le navigateur a bloqué la sauvegarde locale.' : 'Progression sauvegardée sur cet appareil.'}</div>}
         {combat.status !== 'ongoing' && <button className="primary-button rematch-button" onClick={reset}><RotateCcw size={16} /> Recommencer le combat</button>}
       </div>
       <div className="panel combat-log"><div className="panel-heading"><div><div className="eyebrow">CHRONIQUE DU COMBAT</div><h2>Journal des actions</h2></div><span className="log-count">{combat.log.length} action(s)</span></div>
@@ -100,7 +127,7 @@ export default function CombatArena({ onBack }: Props) {
           return <li key={entry.round + '-' + entry.actorId + '-' + index}><span className="log-round">T{entry.round}</span><span><strong>{actor?.name ?? entry.actorId}</strong> · {entry.message}</span></li>
         })}</ol>}
       </div>
-      <p className="rights-note">Prototype de règles : les valeurs sont provisoires. La progression, les récompenses et les sauvegardes ne sont pas encore activées.</p>
+      <p className="rights-note">La progression est sauvegardée dans le stockage local de ce navigateur. Effacer les données du site peut supprimer la sauvegarde ; aucune synchronisation cloud n’est activée.</p>
     </section>
   )
 }

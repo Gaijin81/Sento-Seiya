@@ -34,6 +34,18 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 - [x] Vérifier tests unitaires et build dans GitHub Actions.
 - [ ] Ajouter des tests de parcours navigateur réels (E2E).
 
+## Progression et sauvegarde locale — `feature/progression-save`
+
+- [x] Définir une sauvegarde versionnée pour le profil et les trois chevaliers de départ.
+- [x] Attribuer 50 XP au joueur et à chaque chevalier après une victoire du joueur.
+- [x] Calculer les niveaux avec report de l'XP excédentaire.
+- [x] Empêcher qu'un même combat attribue ses récompenses plusieurs fois.
+- [x] Restaurer la progression depuis le stockage local du navigateur et tolérer les données invalides ou d'une version inconnue.
+- [x] Afficher XP, victoires et niveaux dans l'interface.
+- [x] Ajouter des tests de règles, de doublon, de montée de niveau et de restauration.
+- [x] Vérifier tests et build dans GitHub Actions (run réussi sur le commit de la feature).
+- [ ] Ajouter des tests d'intégration navigateur réels de victoire et rechargement.
+
 ## Progression et collection
 
 - [ ] Modèle de données des chevaliers, armures, techniques et raretés.
