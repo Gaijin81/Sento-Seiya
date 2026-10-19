@@ -3,7 +3,8 @@ import { ArrowLeft, Crosshair, Flame, Footprints, Heart, RotateCcw, Shield, Skip
 import { attackRange, isObstacle, isWithinRange, reachableCells, samePosition, techniqueRange, unitAt } from './board'
 import { getActiveUnit } from './engine'
 import { getKnightDefinition } from './knights'
-import { createSquadCombat, createSquadUnits, DEMO_ENEMIES, playActionAndResolveAi } from './session'
+import { createEncounterCombat, createSquadUnits, DEMO_ENEMIES, playActionAndResolveAi } from './session'
+import type { Encounter } from '../campaign/types'
 import type { CombatAction, CombatState, CombatUnit, Position } from './types'
 import { awardVictoryXp, VICTORY_SHARDS, VICTORY_XP, type ProgressionState } from './progression'
 
@@ -13,23 +14,28 @@ type Props = {
   onProgressionChanged: (progression: ProgressionState) => boolean
   onBack: () => void
   onEditSquad: () => void
+  /** Campaign fight; defaults to the Sanctuary trial. */
+  encounter?: Encounter
+  onCombatEnd?: (victory: boolean) => void
+  backLabel?: string
 }
 
-function unitGlyph(unit: CombatUnit): string {
+function unitGlyph(unit: Pick<CombatUnit, 'id' | 'name' | 'team'>): string {
   if (unit.team === 'player') return getKnightDefinition(unit.id)?.glyph ?? '?'
-  return unit.name === 'Chevalier noir' ? '影' : '守'
+  return /noir/i.test(unit.name) ? '影' : '守'
 }
 
 function createCombatId(): string {
   return 'combat-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2)
 }
 
-export default function CombatArena({ progression, onProgressionChanged, onBack, onEditSquad }: Props) {
+export default function CombatArena({ progression, onProgressionChanged, onBack, onEditSquad, encounter, onCombatEnd, backLabel = 'Retour aux arènes' }: Props) {
+  const enemySetups = encounter?.enemies ?? DEMO_ENEMIES
   const [phase, setPhase] = useState<'preparation' | 'battle'>('preparation')
-  const [combat, setCombat] = useState<CombatState>(() => createSquadCombat(progression))
+  const [combat, setCombat] = useState<CombatState>(() => createEncounterCombat(progression, enemySetups))
   const [combatId, setCombatId] = useState(() => createCombatId())
   const [saveWarning, setSaveWarning] = useState(false)
-  const [targetId, setTargetId] = useState('black-pega')
+  const [targetId, setTargetId] = useState(enemySetups[0]?.id ?? '')
   const [feedback, setFeedback] = useState('Déplace-toi sur une case dorée ou choisis une action.')
   const active = getActiveUnit(combat)
   const allies = combat.units.filter((unit) => unit.team === 'player')
@@ -75,9 +81,9 @@ export default function CombatArena({ progression, onProgressionChanged, onBack,
   }
 
   const startBattle = () => {
-    setCombat(createSquadCombat(progression))
+    setCombat(createEncounterCombat(progression, enemySetups))
     setCombatId(createCombatId())
-    setTargetId('black-pega')
+    setTargetId(enemySetups[0]?.id ?? '')
     setFeedback('Nouveau combat : déplace-toi sur une case dorée ou choisis une action.')
     setPhase('battle')
   }
@@ -86,7 +92,7 @@ export default function CombatArena({ progression, onProgressionChanged, onBack,
     const squad = createSquadUnits(progression)
     return (
       <section className="page-section combat-page" aria-label="Préparation du combat">
-        <button className="text-button combat-back" onClick={onBack}><ArrowLeft size={15} /> Retour aux arènes</button>
+        <button className="text-button combat-back" onClick={onBack}><ArrowLeft size={15} /> {backLabel}</button>
         <div className="eyebrow">ÉPREUVE DU SANCTUAIRE · PRÉPARATION</div>
         <div className="combat-title-row">
           <div><h1>Prépare ton escouade</h1><p className="page-intro">Vérifie tes chevaliers engagés et leurs statistiques actuelles avant d’entrer dans l’arène.</p></div>
@@ -113,10 +119,10 @@ export default function CombatArena({ progression, onProgressionChanged, onBack,
           </div>
           <div className="battle-divider"><span>VS</span><i /></div>
           <div className="battle-side enemy-side">
-            <div className="battle-side-heading"><span>ADVERSAIRES ATTENDUS</span><span>{DEMO_ENEMIES.length}</span></div>
-            {DEMO_ENEMIES.map((unit) => (
+            <div className="battle-side-heading"><span>ADVERSAIRES ATTENDUS</span><span>{enemySetups.length}</span></div>
+            {enemySetups.map((unit) => (
               <article className="battle-unit enemy" key={unit.id}>
-                <div className="battle-avatar enemy-avatar">{unit.name === 'Chevalier noir' ? '影' : '守'}</div>
+                <div className="battle-avatar enemy-avatar">{unitGlyph(unit)}</div>
                 <div className="battle-unit-main">
                   <div className="battle-unit-name"><strong>{unit.name}</strong><span>ENNEMI</span></div>
                   <div className="meter-label"><Heart size={12} /> PV <b>{unit.maxHp}</b></div>
@@ -139,10 +145,10 @@ export default function CombatArena({ progression, onProgressionChanged, onBack,
 
   return (
     <section className="page-section combat-page" aria-label="Combat tactique">
-      <button className="text-button combat-back" onClick={onBack}><ArrowLeft size={15} /> Retour aux arènes</button>
+      <button className="text-button combat-back" onClick={onBack}><ArrowLeft size={15} /> {backLabel}</button>
       <div className="eyebrow">ÉPREUVE DU SANCTUAIRE · COMBAT TACTIQUE</div>
       <div className="combat-title-row">
-        <div><h1>Le réveil du Cosmos</h1><p className="page-intro">Déplace tes chevaliers sur le plateau, puis frappe les adversaires à portée. Les tours de l’IA se résolvent automatiquement.</p></div>
+        <div><h1>{encounter?.title ?? 'Le réveil du Cosmos'}</h1><p className="page-intro">Déplace tes chevaliers sur le plateau, puis frappe les adversaires à portée. Les tours de l’IA se résolvent automatiquement.</p></div>
         <div className="round-pill">TOUR <strong>{combat.round}</strong></div>
       </div>
       <div className="progression-summary" aria-label="Progression sauvegardée"><span><Sparkles size={14} /> EXPÉRIENCE DU JOUEUR <strong>{progression.playerXp} XP</strong></span><span>VICTOIRES <strong>{progression.victories}</strong></span><span>ÉCLATS <strong>{progression.cosmosShards}</strong></span></div>
@@ -197,7 +203,7 @@ export default function CombatArena({ progression, onProgressionChanged, onBack,
           <div className="battle-side-heading"><span>ADVERSAIRES</span><span>{livingEnemies.length}/{enemies.length} actifs</span></div>
           {enemies.map((unit) => (
             <button type="button" className={'battle-unit enemy ' + (targetId === unit.id && unit.hp > 0 ? 'target-selected ' : '') + (unit.hp <= 0 ? 'unit-defeated' : '')} key={unit.id} onClick={() => unit.hp > 0 && setTargetId(unit.id)} disabled={unit.hp <= 0 || !isPlayerTurn} aria-pressed={targetId === unit.id}>
-              <div className="battle-avatar enemy-avatar">{unit.name === 'Chevalier noir' ? '影' : '守'}</div>
+              <div className="battle-avatar enemy-avatar">{unitGlyph(unit)}</div>
               <div className="battle-unit-main">
                 <div className="battle-unit-name"><strong>{unit.name}</strong><span>{unit.hp <= 0 ? 'VAINCU' : targetId === unit.id ? 'CIBLE' : 'ENNEMI'}</span></div>
                 <div className="meter-label"><Heart size={12} /> PV <b>{unit.hp}/{unit.maxHp}</b></div>
@@ -220,7 +226,7 @@ export default function CombatArena({ progression, onProgressionChanged, onBack,
         </div>
         <div className="combat-feedback" aria-live="polite">{feedback}</div>
         {combat.status === 'victory' && <div className="victory-reward" role="status"><Trophy size={16} /> Victoire récompensée : +{VICTORY_XP} XP pour chaque chevalier engagé et +{VICTORY_SHARDS} éclats de Cosmos. {saveWarning ? 'Attention : le navigateur a bloqué la sauvegarde locale.' : 'Progression sauvegardée sur cet appareil.'}</div>}
-        {combat.status !== 'ongoing' && <div className="prep-buttons"><button className="primary-button rematch-button" onClick={startBattle}><RotateCcw size={16} /> Recommencer le combat</button><button className="secondary-button rematch-button" onClick={() => setPhase('preparation')}><Users size={15} /> Retour à la préparation</button></div>}
+        {combat.status !== 'ongoing' && <div className="prep-buttons">{onCombatEnd && <button className="primary-button rematch-button" onClick={() => onCombatEnd(combat.status === 'victory')}><ArrowLeft size={16} /> {combat.status === 'victory' ? 'Continuer l’aventure' : 'Battre en retraite'}</button>}<button className="primary-button rematch-button" onClick={startBattle}><RotateCcw size={16} /> Recommencer le combat</button><button className="secondary-button rematch-button" onClick={() => setPhase('preparation')}><Users size={15} /> Retour à la préparation</button></div>}
       </div>
       <div className="panel combat-log"><div className="panel-heading"><div><div className="eyebrow">CHRONIQUE DU COMBAT</div><h2>Journal des actions</h2></div><span className="log-count">{combat.log.length} action(s)</span></div>
         {combat.log.length === 0 ? <p className="empty-log">Les actions apparaîtront ici au fil du combat.</p> : <ol>{[...combat.log].reverse().map((entry, index) => {

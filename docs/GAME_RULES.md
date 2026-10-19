@@ -109,6 +109,16 @@ L'arène de démonstration oppose l'escouade du joueur (1 à 3 chevaliers) à de
 - Lors de la migration d'une sauvegarde v1, le joueur reçoit 30 éclats par victoire déjà obtenue et l'escouade contient les trois chevaliers de départ.
 - Les valeurs de coût et de statistiques sont provisoires et servent à valider la boucle, pas l'équilibrage final.
 
+## 6 quinquies. Campagne : plateau d'aventure et choix multiples
+
+- La campagne est un plateau de cases reliées (chapitre 1 : 7 × 3). Le jeton du joueur occupe une case ; les cases suivantes possibles sont entourées de pointillés dorés.
+- Chaque case ouvre une scène de récit avec 1 à 4 choix, façon « livre dont vous êtes le héros ». Un choix mène toujours à une case.
+- Un choix peut demander une condition : un chevalier dans la collection ou dans l'escouade, un choix précédent (drapeau), ou un minimum d'éclats. Un choix verrouillé reste visible, avec sa raison.
+- Un choix peut donner des effets : drapeaux (mémoire des choix), éclats de Cosmos, ralliement d'un chevalier (ajouté à l'escouade s'il reste une place).
+- Un choix de combat lance un combat sur le plateau tactique contre l'adversaire de la scène. Victoire : le choix est résolu (XP et éclats du combat en plus). Défaite ou retraite : le choix est annulé, le joueur reste sur la case et peut choisir autre chose.
+- Une case « fin » termine le chapitre. Le chapitre peut être rejoué ; les récompenses de choix déjà obtenues ne sont pas redonnées.
+- La campagne est sauvegardée séparément de la progression (`sento-seiya-campaign`) ; une sauvegarde invalide redémarre le chapitre sans toucher à la progression.
+
 ## 7. Modes prévus
 
 - **PvE** : le joueur affronte des unités contrôlées par l'IA.

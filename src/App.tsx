@@ -3,6 +3,11 @@ import { createInitialProgression, loadProgression, MAX_SQUAD_SIZE, saveProgress
 import { getKnightDefinition, knightStatsAtLevel, type KnightDefinition } from './combat/knights'
 import { getRecruitableKnights, getRecruitStatus, recruitKnight, toggleSquadMember, type ProgressionResult } from './combat/recruitment'
 import CombatArena from './combat/CombatArena'
+import CampaignBoard from './campaign/CampaignBoard'
+import { CHAPTER_ONE } from './campaign/chapter1'
+import { ENCOUNTERS } from './campaign/encounters'
+import { chooseOption, createCampaign, loadCampaign, pendingEncounter, resolveEncounter, saveCampaign, type CampaignResult } from './campaign/engine'
+import type { CampaignState } from './campaign/types'
 import {
   Swords, Shield, Sparkles, Users, Map, ScrollText, Trophy,
   ChevronRight, Flame, Star, CircleHelp, Menu, X, Heart, Zap,
@@ -78,6 +83,29 @@ export default function App() {
     }
   }
 
+  const [campaign, setCampaign] = useState<CampaignState>(() => {
+    if (typeof window === 'undefined') return createCampaign(CHAPTER_ONE)
+    try { return loadCampaign(window.localStorage, CHAPTER_ONE) } catch { return createCampaign(CHAPTER_ONE) }
+  })
+  const [campaignOutcome, setCampaignOutcome] = useState('')
+  const [campaignFight, setCampaignFight] = useState<string | null>(null)
+
+  const commitCampaign = (next: CampaignState) => {
+    setCampaign(next)
+    try { if (typeof window !== 'undefined') saveCampaign(window.localStorage, next) } catch { /* progress stays in memory */ }
+  }
+
+  const applyCampaign = (result: CampaignResult) => {
+    if (!result.ok) {
+      setNotice(result.error)
+      return
+    }
+    commitCampaign(result.state)
+    if (result.progression !== progression) commitProgression(result.progression)
+    setCampaignOutcome(result.outcome)
+    setCampaignFight(result.encounter ?? null)
+  }
+
   const applyResult = (result: ProgressionResult, success: string) => {
     if (!result.ok) {
       setNotice(result.error)
@@ -95,7 +123,8 @@ export default function App() {
   const recruitable = getRecruitableKnights(progression)
 
   const startCampaign = () => {
-    setNotice(`Aventure sélectionnée : ${campaigns[selectedCampaign].title}. Le moteur de combat sera ajouté dans une prochaine fonctionnalité.`)
+    setNotice(selectedCampaign === 0 ? '' : `Aventure sélectionnée : ${campaigns[selectedCampaign].title}. Cet arc sera ajouté dans un prochain chapitre ; le chapitre 1 est jouable.`)
+    document.getElementById('campaign-board')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   const navItems: { label: Section; icon: typeof Map }[] = [
@@ -151,7 +180,20 @@ export default function App() {
           <div className="topbar-actions"><div className="resource" aria-label="Éclats de Cosmos"><Sparkles size={16} /><strong>{progression.cosmosShards}</strong><span>Éclats</span></div><div className="top-avatar">?</div></div>
         </header>
 
-        {activeSection === 'Campagne' && (
+        {activeSection === 'Campagne' && campaignFight && ENCOUNTERS[campaignFight] && (
+          <CombatArena
+            key={campaignFight}
+            progression={progression}
+            onProgressionChanged={commitProgression}
+            encounter={ENCOUNTERS[campaignFight]}
+            backLabel="Retour à la campagne"
+            onBack={() => setCampaignFight(null)}
+            onEditSquad={() => setActiveSection('Équipe')}
+            onCombatEnd={(victory) => applyCampaign(resolveEncounter(CHAPTER_ONE, campaign, progression, victory))}
+          />
+        )}
+
+        {activeSection === 'Campagne' && !(campaignFight && ENCOUNTERS[campaignFight]) && (
           <>
             <section className="hero">
               <div className="hero-orbit orbit-one" /><div className="hero-orbit orbit-two" />
@@ -169,6 +211,17 @@ export default function App() {
               </div>
               <div className="hero-index"><span>01</span><i /> 03</div>
             </section>
+
+            <CampaignBoard
+              chapter={CHAPTER_ONE}
+              state={campaign}
+              progression={progression}
+              outcome={campaignOutcome}
+              onChoose={(choiceId) => applyCampaign(chooseOption(CHAPTER_ONE, campaign, progression, choiceId))}
+              onResumeCombat={() => setCampaignFight(pendingEncounter(CHAPTER_ONE, campaign) ?? null)}
+              onRetreat={() => applyCampaign(resolveEncounter(CHAPTER_ONE, campaign, progression, false))}
+              onRestart={() => { commitCampaign(createCampaign(CHAPTER_ONE, campaign.rewarded)); setCampaignOutcome('') }}
+            />
 
             <section className="stats-row" aria-label="Progression">
               <div className="stat-item"><div className="stat-icon gold-icon"><Trophy size={18} /></div><div><span>QUÊTES TERMINÉES</span><strong>0 <small>/ 24</small></strong></div></div>

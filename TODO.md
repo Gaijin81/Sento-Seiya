@@ -67,18 +67,21 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 - [x] Action « Fin du tour » après un déplacement ou pour attendre.
 - [x] IA tactique : technique ou attaque à portée, sinon rapprochement de la cible la plus proche, sinon attente.
 - [x] Tests du plateau, du déplacement, des portées, du placement et de l'IA.
-- [ ] Grille interactive dans l'arène (tactile et souris) : cases accessibles, cibles à portée, obstacles.
+- [x] Grille interactive dans l'arène (tactile et souris) : cases accessibles, cibles à portée, obstacles.
 - [ ] Terrain avancé : couverture, hauteur, cases spéciales.
 
 ## Plateau d'aventure et choix multiples — `feature/campaign-board`
 
-- [ ] Plateau de campagne en cases reliées : combat, événement, trésor, repos, boss.
-- [ ] Scènes à choix multiples façon « livre dont vous êtes le héros » (2 ou 3 choix par scène).
-- [ ] Conséquences des choix : combat, récompense, ralliement d'un chevalier, chemin alternatif, fin différente.
-- [ ] Conditions de choix (chevalier dans l'escouade, éclats, choix précédents).
-- [ ] Sauvegarde de la position sur le plateau, des choix faits et des cases visitées (migration de sauvegarde).
-- [ ] Chapitre 1 « Tournoi galactique » avec des textes d'intrigue originaux et un boss.
-- [ ] Tests du parcours, des choix, des conséquences et de la sauvegarde.
+- [x] Plateau de campagne en cases reliées : départ, récit, combat, trésor, repos, boss, fin.
+- [x] Scènes à choix multiples façon « livre dont vous êtes le héros » (2 à 4 choix par scène).
+- [x] Conséquences des choix : combat sur le plateau tactique, éclats, ralliement de Jabu, chemins alternatifs, fin pacifique ou par le combat.
+- [x] Conditions de choix (chevalier dans l'escouade ou la collection, choix précédents, éclats) avec la raison affichée.
+- [x] Défaite ou retraite : le choix est annulé et le joueur peut en faire un autre ; victoire : le choix est résolu.
+- [x] Sauvegarde séparée de la campagne (`sento-seiya-campaign`) : case, cases visitées, choix, combat en attente ; récompenses non redonnées en rejouant.
+- [x] Chapitre 1 « Le tournoi galactique » : 10 cases, 4 combats dont un boss, textes originaux.
+- [x] Tests de cohérence du chapitre, des choix, des conditions, des combats, des récompenses et de la sauvegarde.
+- [ ] Chapitres suivants (Sanctuaire, Asgard, Poséidon, Hadès) après cadrage narratif.
+- [ ] Illustrations des scènes et musique d'ambiance par chapitre.
 
 ## Joueur contre Joueur et coop locale — `feature/local-versus`
 
