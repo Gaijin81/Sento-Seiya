@@ -159,7 +159,8 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 - [ ] Tests de parcours UI critiques.
 - [ ] Accessibilité clavier, contrastes et lecteurs d'écran.
 - [ ] Vérifier les performances sur smartphone et tablette.
-- [ ] Ajouter PWA et mode hors ligne si pertinent.
+- [x] PWA : manifeste, icônes, installation sur smartphone/PC et service worker (jeu jouable hors ligne après la première visite).
+- [ ] Notification « nouvelle version disponible » quand le service worker se met à jour.
 - [ ] Ajouter télémétrie respectueuse de la vie privée, désactivable.
 - [ ] Publier des versions stables avec tags.
 - [ ] Tenir cette liste à jour à chaque PR; ne cocher que ce qui a été testé.
