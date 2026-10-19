@@ -7,7 +7,7 @@ import { audio, THEME_LABELS, THEMES, type Theme } from './audio/engine'
 import { loadAudioSettings, saveAudioSettings, type AudioSettings } from './audio/settings'
 import { activatePacks, installPack, loadInstalledPacks, saveInstalledPacks, uninstallPack, type ContentPack } from './dlc/manifest'
 import { EXAMPLE_PACK } from './dlc/examplePack'
-import { applyEquipment, availableCount, bonusLabel, allItems, equipItem, EQUIPMENT_SLOTS, forgeItem, getItem, ownedCount, SLOT_LABELS, unequipItem } from './combat/equipment'
+import { applyEquipment, availableCount, bonusLabel, allItems, equipItem, EQUIPMENT_SLOTS, isForgeable, RARITY_LABELS, forgeItem, getItem, ownedCount, SLOT_LABELS, unequipItem } from './combat/equipment'
 import CampaignBoard from './campaign/CampaignBoard'
 import LocalVersus from './versus/LocalVersus'
 import type { LocalMode } from './versus/match'
@@ -352,7 +352,7 @@ export default function App() {
             })}</div>
             <div className="section-heading recruit-heading"><div><div className="eyebrow">FORGE · POUSSIÈRES D’ÉTOILES</div><h2>Équipement</h2></div><span className="log-count"><Hammer size={13} /> {progression.stardust} poussières</span></div>
             <p className="page-intro">Chaque victoire rapporte {VICTORY_STARDUST} poussières d’étoiles. Forge des objets puis équipe-les (une relique et un talisman par chevalier) : leurs bonus s’appliquent en combat.</p>
-            <div className="forge-grid">{allItems().map((item) => (
+            <div className="forge-grid">{allItems().filter(isForgeable).map((item) => (
               <article className="panel forge-item" key={item.id}>
                 <div className="eyebrow">{SLOT_LABELS[item.slot].toUpperCase()}</div>
                 <h3>{item.name}</h3>
@@ -362,6 +362,20 @@ export default function App() {
                 <button className="secondary-button" disabled={progression.stardust < item.cost} onClick={() => applyResult(forgeItem(progression, item.id), `${item.name} forgé !`)}><Hammer size={14} /> Forger · {item.cost}</button>
               </article>
             ))}</div>
+            <div className="section-heading recruit-heading"><div><div className="eyebrow">OBJETS RARES · CAMPAGNE</div><h2>Trésors</h2></div><span className="log-count">{allItems().filter((item) => !isForgeable(item) && ownedCount(progression, item.id) > 0).length} / {allItems().filter((item) => !isForgeable(item)).length} trouvés</span></div>
+            <p className="page-intro">Les objets rares et légendaires ne se forgent pas : ils se trouvent en campagne, selon tes choix.</p>
+            <div className="forge-grid">{allItems().filter((item) => !isForgeable(item)).map((item) => {
+              const owned = ownedCount(progression, item.id) > 0
+              return (
+                <article className={`panel forge-item treasure-item rarity-${item.rarity} ${owned ? '' : 'undiscovered'}`} key={item.id}>
+                  <div className="eyebrow">{SLOT_LABELS[item.slot].toUpperCase()} · {RARITY_LABELS[item.rarity ?? 'common'].toUpperCase()}</div>
+                  <h3>{owned ? item.name : '???'}</h3>
+                  <p>{owned ? item.description : 'Pas encore découvert. Explore la campagne et fais d’autres choix.'}</p>
+                  {owned && <strong className="gear-bonus">{bonusLabel(item.bonus)}</strong>}
+                  {owned && <div className="detail-stat"><span>Possédés · libres</span><strong>{ownedCount(progression, item.id)} · {availableCount(progression, item.id)}</strong></div>}
+                </article>
+              )
+            })}</div>
             <div className="section-heading recruit-heading"><div><div className="eyebrow">RECRUTEMENT</div><h2>Nouveaux alliés</h2></div><button className="text-button" onClick={() => setActiveSection('Combat')}>Préparer un combat <ChevronRight size={15} /></button></div>
             {recruitable.length === 0 ? <p className="page-intro">Tous les chevaliers disponibles ont rejoint ton équipe.</p> : <div className="roster-page-grid">{recruitable.map((definition: KnightDefinition) => {
               const status = getRecruitStatus(progression, definition)

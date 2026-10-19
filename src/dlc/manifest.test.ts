@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { allItems, forgeItem, getItem, setExtraItems } from '../combat/equipment'
+import { allItems, EQUIPMENT_CATALOG, forgeItem, getItem, setExtraItems } from '../combat/equipment'
 import { createInitialProgression, parseProgression } from '../combat/progression'
 import { EXAMPLE_PACK } from './examplePack'
 import { activatePacks, DLC_KEY, installPack, loadInstalledPacks, saveInstalledPacks, uninstallPack, validatePack } from './manifest'
@@ -54,7 +54,7 @@ describe('content packs', () => {
     const installed = installPack([], { ...EXAMPLE_PACK, music: { battle: '/combat.ogg' } })
     if (!installed.ok) throw new Error('install')
     expect(activatePacks(installed.packs)).toEqual({ battle: '/combat.ogg' })
-    expect(allItems()).toHaveLength(8)
+    expect(allItems()).toHaveLength(EQUIPMENT_CATALOG.length + 2)
     const forged = forgeItem({ ...createInitialProgression(), stardust: 30 }, 'anneau-de-givre')
     expect(forged.ok && forged.progression.inventory).toEqual(['anneau-de-givre'])
     activatePacks([])

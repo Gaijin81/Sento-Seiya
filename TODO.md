@@ -100,7 +100,8 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 - [x] Inventaire sauvegardé (plusieurs exemplaires possibles), équiper/déséquiper depuis la page Équipe ; bonus appliqués en combat et dans les statistiques affichées.
 - [x] Sauvegarde v3 avec migration automatique des sauvegardes v1/v2 ; équipements invalides ignorés.
 - [x] Tests de la forge, de l'inventaire, des bonus, du combat et de la migration de sauvegarde.
-- [ ] Objets trouvés en campagne et objets rares (armures d'argent / d'or) après cadrage.
+- [x] Objets trouvés en campagne : 3 objets rares/légendaires (fragment d'armure d'argent, éclat d'armure d'or, larme d'étoile filante) non forgeables, obtenus selon les choix du chapitre 1 ; section « Trésors » à la page Équipe.
+- [ ] Armures complètes d'argent et d'or (sets d'objets) avec les chapitres suivants.
 
 ## Musique et contenus additionnels (DLC) — `feature/audio-dlc`
 

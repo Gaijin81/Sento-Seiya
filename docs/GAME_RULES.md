@@ -136,6 +136,12 @@ L'arène de démonstration oppose l'escouade du joueur (1 à 3 chevaliers) à de
 - Les parties locales (PvP / coop) n'utilisent pas l'équipement, pour rester équitables.
 - Sauvegarde v3 : les sauvegardes v1 et v2 sont migrées automatiquement, sans poussières ni objets.
 
+## 6 septies bis. Objets rares trouvés en campagne
+
+- Rareté : commun (forgeable), rare ou légendaire. Les objets rares et légendaires ne se forgent pas : ils sont donnés par certains choix de campagne (effet `items`), une seule fois même en rejouant.
+- Chapitre 1 : prendre le coffre → Larme d'étoile filante (talisman rare : +6 PV, +1 VIT) ; vaincre le chef masqué → Fragment d'armure d'argent (relique rare : +2 ATQ, +1 DÉF) ; duel loyal (route honnête) → Éclat d'armure d'or (talisman légendaire : +10 PV, +1 DÉF, +1 Cosmos max).
+- La page Équipe liste les trésors (non découverts affichés « ??? ») ; ils s'équipent comme les autres objets.
+
 ## 6 octies. Audio et packs de contenu (DLC)
 
 - Trois ambiances musicales originales, générées par le navigateur : menus, campagne, combat (combats d'arène, de campagne et parties locales). Effets sonores pour les choix, attaques, techniques, victoires et défaites.

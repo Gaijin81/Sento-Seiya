@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createInitialProgression, type ProgressionState } from '../combat/progression'
 import { createEncounterCombat } from '../combat/session'
+import { equipItem } from '../combat/equipment'
 import { CHAPTER_ONE } from './chapter1'
 import { ENCOUNTERS } from './encounters'
 import { CAMPAIGN_KEY, chooseOption, createCampaign, listChoices, loadCampaign, parseCampaign, resolveEncounter, saveCampaign, validateChapter } from './engine'
@@ -72,6 +73,18 @@ describe('campaign chapter 1', () => {
     expect(end.state.flags).toEqual(expect.arrayContaining(['honnete', 'paix']))
     expect(end.progression.cosmosShards).toBe(30)
     expect(chooseOption(CHAPTER_ONE, end.state, end.progression, 'affronter').ok).toBe(false)
+  })
+
+  it('grants rare loot from campaign choices, once, and lets it be equipped', () => {
+    const chest = play(['saluer', 'duel', true, 'prendre'])
+    expect(chest.progression.inventory).toEqual(['larme-etoile'])
+    const peaceful = play(['saluer', 'duel', true, 'laisser', 'jabu', 'avancer', 'loyaute'])
+    expect(peaceful.progression.inventory).toEqual(['eclat-or'])
+    const replay = play(['saluer', 'duel', true, 'laisser', 'jabu', 'avancer', 'loyaute'], peaceful.progression, createCampaign(CHAPTER_ONE, peaceful.state.rewarded))
+    expect(replay.progression.inventory).toEqual(['eclat-or'])
+    const equipped = equipItem(replay.progression, 'seiya', 'eclat-or')
+    expect(equipped.ok && equipped.progression.equipment.seiya).toEqual({ charm: 'eclat-or' })
+    expect(validateChapter({ ...CHAPTER_ONE, nodes: CHAPTER_ONE.nodes.map((node) => node.id === 'coffre' ? { ...node, choices: node.choices.map((choice) => ({ ...choice, effects: { items: ['objet-fantome'] } })) } : node) }, Object.keys(ENCOUNTERS))).toContain('coffre:prendre grants unknown item objet-fantome.')
   })
 
   it('grants treasure rewards only once across replays', () => {

@@ -5,11 +5,16 @@ import type { UnitSetup } from './types'
 export type EquipmentSlot = 'relic' | 'charm'
 export type Loadout = Partial<Record<EquipmentSlot, string>>
 export type ItemBonus = { hp?: number; attack?: number; defense?: number; speed?: number; maxCosmos?: number; move?: number; techniqueRange?: number }
-export type EquipmentItem = { id: string; name: string; slot: EquipmentSlot; description: string; cost: number; bonus: ItemBonus }
+export type Rarity = 'common' | 'rare' | 'legendary'
+export type EquipmentItem = { id: string; name: string; slot: EquipmentSlot; description: string; cost: number; bonus: ItemBonus; rarity?: Rarity }
 export type GearResult = { ok: true; progression: ProgressionState } | { ok: false; error: string; progression: ProgressionState }
 
 export const EQUIPMENT_SLOTS: EquipmentSlot[] = ['relic', 'charm']
 export const SLOT_LABELS: Record<EquipmentSlot, string> = { relic: 'Relique', charm: 'Talisman' }
+export const RARITY_LABELS: Record<Rarity, string> = { common: 'Commun', rare: 'Rare', legendary: 'Légendaire' }
+
+/** Rare and legendary items cannot be forged: they are only found in the campaign. */
+export const isForgeable = (item: EquipmentItem) => (item.rarity ?? 'common') === 'common'
 
 export const EQUIPMENT_CATALOG: EquipmentItem[] = [
   { id: 'bracelet-bronze', name: 'Bracelet de bronze', slot: 'relic', cost: 20, description: 'Forgé dans les restes d’une armure brisée.', bonus: { attack: 2 } },
@@ -18,6 +23,9 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
   { id: 'plume-phenix', name: 'Plume ardente', slot: 'charm', cost: 20, description: 'Une plume tiède qui ne s’éteint jamais.', bonus: { hp: 8 } },
   { id: 'gemme-cosmos', name: 'Gemme de Cosmos', slot: 'charm', cost: 25, description: 'Un éclat cristallisé qui élargit le Cosmos.', bonus: { maxCosmos: 1 } },
   { id: 'sandales-ailees', name: 'Sandales ailées', slot: 'charm', cost: 35, description: 'Légères comme le vent du Sanctuaire.', bonus: { move: 1, speed: 1 } },
+  { id: 'larme-etoile', name: 'Larme d’étoile filante', slot: 'charm', cost: 0, rarity: 'rare', description: 'Une goutte de lumière tombée du ciel le soir du tournoi.', bonus: { hp: 6, speed: 1 } },
+  { id: 'fragment-argent', name: 'Fragment d’armure d’argent', slot: 'relic', cost: 0, rarity: 'rare', description: 'Arraché à l’armure noire du chef masqué : de l’argent véritable.', bonus: { attack: 2, defense: 1 } },
+  { id: 'eclat-or', name: 'Éclat d’armure d’or', slot: 'charm', cost: 0, rarity: 'legendary', description: 'Confié en signe de respect. Il brille comme le Sagittaire.', bonus: { hp: 10, defense: 1, maxCosmos: 1 } },
 ]
 
 let extraItems: EquipmentItem[] = []
@@ -57,6 +65,7 @@ export function availableCount(progression: ProgressionState, itemId: string): n
 export function forgeItem(progression: ProgressionState, itemId: string): GearResult {
   const item = getItem(itemId)
   if (!item) return { ok: false, error: 'Objet inconnu.', progression }
+  if (!isForgeable(item)) return { ok: false, error: `${item.name} ne se forge pas : il se trouve en campagne.`, progression }
   if (progression.stardust < item.cost) return { ok: false, error: `Il faut ${item.cost} poussières d’étoiles pour forger ${item.name}.`, progression }
   return { ok: true, progression: { ...progression, stardust: progression.stardust - item.cost, inventory: [...progression.inventory, item.id] } }
 }
@@ -124,4 +133,10 @@ export function normalizeEquipment(raw: unknown, knights: KnightProgress[], inve
     if (Object.keys(kept).length > 0) result[knight.id] = kept
   }
   return result
+}
+
+/** Adds found items (campaign loot) to the inventory; unknown ids are ignored. */
+export function grantItems(progression: ProgressionState, itemIds: string[]): ProgressionState {
+  const found = itemIds.filter((id) => getItem(id))
+  return found.length ? { ...progression, inventory: [...progression.inventory, ...found] } : progression
 }

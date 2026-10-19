@@ -1,6 +1,7 @@
 import { MAX_SQUAD_SIZE, createKnightProgress, type ProgressionState, type StorageLike } from '../combat/progression'
 import { getKnightDefinition } from '../combat/knights'
 import type { CampaignNode, CampaignState, Chapter, Choice, Requirement } from './types'
+import { getItem, grantItems } from '../combat/equipment'
 
 export const CAMPAIGN_KEY = 'sento-seiya-campaign'
 
@@ -54,6 +55,7 @@ function resolve(chapter: Chapter, state: CampaignState, progression: Progressio
     if (effects.shards) next = { ...next, cosmosShards: Math.max(0, next.cosmosShards + effects.shards) }
     if (effects.stardust) next = { ...next, stardust: Math.max(0, next.stardust + effects.stardust) }
     if (effects.recruit) next = recruit(next, effects.recruit)
+    if (effects.items?.length) next = grantItems(next, effects.items)
   }
   return {
     ok: true,
@@ -66,7 +68,7 @@ function resolve(chapter: Chapter, state: CampaignState, progression: Progressio
       flags: [...new Set([...state.flags, ...(effects.flags ?? [])])],
       history: [...state.history, { nodeId: node.id, choiceId: choice.id }],
       pending: null,
-      rewarded: state.rewarded.includes(key) || (!effects.shards && !effects.stardust && !effects.recruit) ? state.rewarded : [...state.rewarded, key],
+      rewarded: state.rewarded.includes(key) || (!effects.shards && !effects.stardust && !effects.recruit && !effects.items?.length) ? state.rewarded : [...state.rewarded, key],
       completed: destination.kind === 'ending',
     },
   }
@@ -112,6 +114,7 @@ export function validateChapter(chapter: Chapter, encounterIds: string[]): strin
     if (node.kind !== 'ending' && node.choices.length === 0) errors.push(`${node.id} is a dead end.`)
     for (const choice of node.choices) {
       if (!ids.has(choice.goTo)) errors.push(`${node.id}:${choice.id} goes to unknown ${choice.goTo}.`)
+      for (const item of choice.effects?.items ?? []) if (!getItem(item)) errors.push(`${node.id}:${choice.id} grants unknown item ${item}.`)
       if (choice.combat && !encounterIds.includes(choice.combat)) errors.push(`${node.id}:${choice.id} uses unknown encounter ${choice.combat}.`)
     }
     if (node.choices.length > 0 && node.choices.every((choice) => choice.requires)) errors.push(`${node.id} may lock every choice.`)
