@@ -119,6 +119,14 @@ L'arène de démonstration oppose l'escouade du joueur (1 à 3 chevaliers) à de
 - Une case « fin » termine le chapitre. Le chapitre peut être rejoué ; les récompenses de choix déjà obtenues ne sont pas redonnées.
 - La campagne est sauvegardée séparément de la progression (`sento-seiya-campaign`) ; une sauvegarde invalide redémarre le chapitre sans toucher à la progression.
 
+## 6 sexies. Parties locales (même appareil)
+
+- **Joueur contre Joueur** : le Joueur 1 joue le camp gauche, le Joueur 2 le camp droit ; chacun engage 1 à 3 chevaliers (le même chevalier peut être dans les deux camps). Aucune IA n'agit.
+- **Coop** : chaque joueur engage 1 à 2 chevaliers différents ; ensemble, ils affrontent le chef des chevaliers noirs et son escorte, joués par l'IA tactique.
+- Tous les chevaliers combattent au niveau 3. Les règles du plateau tactique s'appliquent.
+- Quand la main passe d'un joueur humain à l'autre, un écran demande de passer l'appareil avant d'afficher le plateau.
+- Les parties locales ne donnent ni XP ni éclats et ne modifient pas la sauvegarde.
+
 ## 7. Modes prévus
 
 - **PvE** : le joueur affronte des unités contrôlées par l'IA.

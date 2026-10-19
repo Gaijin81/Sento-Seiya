@@ -4,6 +4,8 @@ import { getKnightDefinition, knightStatsAtLevel, type KnightDefinition } from '
 import { getRecruitableKnights, getRecruitStatus, recruitKnight, toggleSquadMember, type ProgressionResult } from './combat/recruitment'
 import CombatArena from './combat/CombatArena'
 import CampaignBoard from './campaign/CampaignBoard'
+import LocalVersus from './versus/LocalVersus'
+import type { LocalMode } from './versus/match'
 import { CHAPTER_ONE } from './campaign/chapter1'
 import { ENCOUNTERS } from './campaign/encounters'
 import { chooseOption, createCampaign, loadCampaign, pendingEncounter, resolveEncounter, saveCampaign, type CampaignResult } from './campaign/engine'
@@ -60,7 +62,7 @@ const recruitLabels = {
   owned: 'Recruté',
 } as const
 
-type Section = 'Campagne' | 'Équipe' | 'Arènes' | 'Combat' | 'Codex'
+type Section = 'Campagne' | 'Équipe' | 'Arènes' | 'Combat' | 'Codex' | 'Partie locale'
 
 export default function App() {
   const [activeSection, setActiveSection] = useState<Section>('Campagne')
@@ -89,6 +91,8 @@ export default function App() {
   })
   const [campaignOutcome, setCampaignOutcome] = useState('')
   const [campaignFight, setCampaignFight] = useState<string | null>(null)
+  const [localMode, setLocalMode] = useState<LocalMode>('pvp')
+  const openLocal = (mode: LocalMode) => { setLocalMode(mode); setActiveSection('Partie locale') }
 
   const commitCampaign = (next: CampaignState) => {
     setCampaign(next)
@@ -296,8 +300,9 @@ export default function App() {
           </section>
         )}
 
-        {activeSection === 'Arènes' && <section className="page-section"><div className="eyebrow">COMBAT · HONNEUR · STRATÉGIE</div><h1>Les arènes</h1><p className="page-intro">Prépare-toi aux combats tactiques, aux défis contre l’IA et aux affrontements entre joueurs.</p><div className="arena-grid"><article className="arena-card"><div className="arena-icon"><Swords size={28} /></div><span className="campaign-subtitle">SOLO · PVE</span><h2>Épreuve du Sanctuaire</h2><p>Affronte une série d’adversaires contrôlés par l’IA et teste ta stratégie.</p><button className="secondary-button arena-launch" onClick={() => setActiveSection('Combat')}><Swords size={15} /> Lancer un combat <ChevronRight size={15} /></button></article><article className="arena-card"><div className="arena-icon violet-icon"><Shield size={28} /></div><span className="campaign-subtitle">DUEL · PVP</span><h2>Défi des chevaliers</h2><p>Compare tes équipes et mesure ta maîtrise du Cosmos contre d’autres joueurs.</p><span className="coming-soon">MULTIJOUEUR À VENIR</span></article><article className="arena-card"><div className="arena-icon jade-icon"><Users size={28} /></div><span className="campaign-subtitle">COOPÉRATION</span><h2>Alliance des héros</h2><p>Unis tes forces avec d’autres joueurs pour vaincre des boss redoutables.</p><span className="coming-soon">COOP À VENIR</span></article></div></section>}
+        {activeSection === 'Arènes' && <section className="page-section"><div className="eyebrow">COMBAT · HONNEUR · STRATÉGIE</div><h1>Les arènes</h1><p className="page-intro">Prépare-toi aux combats tactiques, aux défis contre l’IA et aux affrontements entre joueurs.</p><div className="arena-grid"><article className="arena-card"><div className="arena-icon"><Swords size={28} /></div><span className="campaign-subtitle">SOLO · PVE</span><h2>Épreuve du Sanctuaire</h2><p>Affronte une série d’adversaires contrôlés par l’IA et teste ta stratégie.</p><button className="secondary-button arena-launch" onClick={() => setActiveSection('Combat')}><Swords size={15} /> Lancer un combat <ChevronRight size={15} /></button></article><article className="arena-card"><div className="arena-icon violet-icon"><Shield size={28} /></div><span className="campaign-subtitle">DUEL · PVP</span><h2>Défi des chevaliers</h2><p>Compare tes équipes et mesure ta maîtrise du Cosmos contre d’autres joueurs.</p><button className="secondary-button arena-launch" onClick={() => openLocal('pvp')}><Swords size={15} /> Duel sur le même appareil <ChevronRight size={15} /></button></article><article className="arena-card"><div className="arena-icon jade-icon"><Users size={28} /></div><span className="campaign-subtitle">COOPÉRATION</span><h2>Alliance des héros</h2><p>Unis tes forces avec d’autres joueurs pour vaincre des boss redoutables.</p><button className="secondary-button arena-launch" onClick={() => openLocal('coop')}><Users size={15} /> Coop sur le même appareil <ChevronRight size={15} /></button></article></div></section>}
 
+        {activeSection === 'Partie locale' && <LocalVersus key={localMode} initialMode={localMode} onBack={() => setActiveSection('Arènes')} />}
         {activeSection === 'Combat' && <CombatArena progression={progression} onProgressionChanged={commitProgression} onBack={() => setActiveSection('Arènes')} onEditSquad={() => setActiveSection('Équipe')} />}
 
         {activeSection === 'Codex' && <section className="page-section"><div className="eyebrow">ARCHIVES · MYTHES · LÉGENDES</div><h1>Codex du Cosmos</h1><p className="page-intro">Le codex rassemblera les chevaliers, les armures, les factions, les lieux et les récits découverts durant tes aventures.</p><div className="codex-grid"><article><Shield size={24} /><h2>Armures sacrées</h2><p>Bronze, Argent, Or et armures légendaires.</p></article><article><Star size={24} /><h2>Chevaliers & factions</h2><p>Personnages, affiliations, techniques et liens.</p></article><article><Map size={24} /><h2>Atlas des royaumes</h2><p>Sanctuaire, Asgard, royaume sous-marin et au-delà.</p></article><article><ScrollText size={24} /><h2>Chroniques</h2><p>Arcs narratifs et chronologie des aventures.</p></article></div><p className="rights-note">Les contenus officiels, images, musiques et noms associés à la licence restent soumis aux droits de leurs ayants droit. Ce prototype utilise une interface originale et des éléments textuels provisoires.</p></section>}

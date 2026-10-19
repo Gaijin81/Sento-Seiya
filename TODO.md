@@ -85,10 +85,13 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 
 ## Joueur contre Joueur et coop locale — `feature/local-versus`
 
-- [ ] PvP local sur le même appareil (deux escouades, tour par tour sur le plateau).
-- [ ] Coop locale : deux joueurs contrôlent chacun leurs chevaliers contre l'IA.
-- [ ] Écran de passage de main entre joueurs et choix du mode.
-- [ ] Tests des modes et des conditions de victoire.
+- [x] PvP local sur le même appareil : deux équipes (1 à 3 chevaliers chacune, miroirs autorisés), tour par tour sur le plateau, sans IA.
+- [x] Coop locale : deux joueurs (1 à 2 chevaliers chacun, sans doublon) contrôlent chacun leurs chevaliers contre le boss du chapitre 1 et son escorte (IA).
+- [x] Écran de passage de main entre joueurs, choix du mode et revanche ; accès depuis la page Arènes.
+- [x] Niveau identique pour tous en partie locale (niveau 3) ; la progression n'est pas modifiée.
+- [x] Composant de plateau partagé entre l'arène, la campagne et les parties locales.
+- [x] Tests des modes, des contrôleurs, des actions hors tour, du passage de main et des conditions de victoire.
+- [ ] Coop et PvP en ligne (voir « Modes de jeu »).
 
 ## Équipement et ressources — `feature/equipment`
 

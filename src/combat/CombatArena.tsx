@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { ArrowLeft, Crosshair, Flame, Footprints, Heart, RotateCcw, Shield, SkipForward, Sparkles, Swords, Trophy, Users, Zap } from 'lucide-react'
-import { attackRange, isObstacle, isWithinRange, reachableCells, samePosition, techniqueRange, unitAt } from './board'
+import { ArrowLeft, Crosshair, Flame, Heart, RotateCcw, Shield, SkipForward, Sparkles, Swords, Trophy, Users, Zap } from 'lucide-react'
+import { attackRange, isWithinRange, reachableCells, samePosition, techniqueRange, unitAt } from './board'
 import { getActiveUnit } from './engine'
 import { getKnightDefinition } from './knights'
 import { createEncounterCombat, createSquadUnits, DEMO_ENEMIES, playActionAndResolveAi } from './session'
 import type { Encounter } from '../campaign/types'
+import TacticalBoard, { unitGlyph } from './TacticalBoard'
 import type { CombatAction, CombatState, CombatUnit, Position } from './types'
 import { awardVictoryXp, VICTORY_SHARDS, VICTORY_XP, type ProgressionState } from './progression'
 
@@ -18,11 +19,6 @@ type Props = {
   encounter?: Encounter
   onCombatEnd?: (victory: boolean) => void
   backLabel?: string
-}
-
-function unitGlyph(unit: Pick<CombatUnit, 'id' | 'name' | 'team'>): string {
-  if (unit.team === 'player') return getKnightDefinition(unit.id)?.glyph ?? '?'
-  return /noir/i.test(unit.name) ? '影' : '守'
 }
 
 function createCombatId(): string {
@@ -153,34 +149,7 @@ export default function CombatArena({ progression, onProgressionChanged, onBack,
       </div>
       <div className="progression-summary" aria-label="Progression sauvegardée"><span><Sparkles size={14} /> EXPÉRIENCE DU JOUEUR <strong>{progression.playerXp} XP</strong></span><span>VICTOIRES <strong>{progression.victories}</strong></span><span>ÉCLATS <strong>{progression.cosmosShards}</strong></span></div>
       <div className="combat-status" role="status"><Sparkles size={17} /><span>{combat.status === 'victory' ? 'Victoire — le Sanctuaire reconnaît ta force.' : combat.status === 'defeat' ? 'Défaite — retente ta chance.' : active ? 'Au tour de ' + active.name + (active.team === 'enemy' ? ' (IA).' : '.') : 'Combat terminé.'}</span><span className={'status-tag ' + combat.status}>{combat.status === 'ongoing' ? 'EN COURS' : combat.status === 'victory' ? 'VICTOIRE' : 'DÉFAITE'}</span></div>
-      {combat.board && (
-        <div className="panel tactical-panel">
-          <div className="panel-heading"><div><div className="eyebrow">PLATEAU · ARÈNE DU SANCTUAIRE</div><h2>{!isPlayerTurn ? 'Plateau' : combat.moved ? 'Agis ou termine ton tour' : 'Touche une case dorée pour te déplacer'}</h2></div>{active && isPlayerTurn && <span className="control-hint"><Footprints size={13} /> Mouv. {active.move ?? 3} · Portée {attackRange(active)} · Technique {techniqueRange(active)}</span>}</div>
-          <div className="tactical-board" role="grid" aria-label="Plateau de combat" style={{ gridTemplateColumns: `repeat(${combat.board.width}, minmax(0, 1fr))` }}>
-            {Array.from({ length: combat.board.height }, (_, y) => Array.from({ length: combat.board!.width }, (_, x) => {
-              const cell = { x, y }
-              const occupant = unitAt(combat, cell)
-              const obstacle = isObstacle(combat.board!, cell)
-              const reachable = moveCells.some((entry) => samePosition(entry, cell))
-              const targetable = occupant?.team === 'enemy' && isPlayerTurn && (inAttackRange(occupant) || inTechniqueRange(occupant))
-              const classes = ['board-cell',
-                obstacle ? 'cell-obstacle' : '',
-                reachable ? 'cell-reachable' : '',
-                occupant ? 'cell-' + (occupant.team === 'player' ? 'ally' : 'enemy') : '',
-                occupant && occupant.id === active?.id ? 'cell-active' : '',
-                occupant && occupant.id === selectedTarget?.id ? 'cell-target' : '',
-                targetable ? 'cell-in-range' : ''].filter(Boolean).join(' ')
-              const label = 'Case ' + (x + 1) + '-' + (y + 1) + (obstacle ? ', pilier' : '') + (occupant ? ', ' + occupant.name + ' ' + occupant.hp + '/' + occupant.maxHp + ' PV' : '') + (reachable ? ', déplacement possible' : '') + (targetable ? ', à portée' : '')
-              return (
-                <button type="button" role="gridcell" key={x + '-' + y} className={classes} aria-label={label} onClick={() => onCellClick(cell)} disabled={!isPlayerTurn || obstacle || (!reachable && occupant?.team !== 'enemy')}>
-                  {obstacle && <span className="pillar" aria-hidden="true">▲</span>}
-                  {occupant && <span className={'board-token ' + (occupant.team === 'player' ? getKnightDefinition(occupant.id)?.color ?? '' : 'enemy-avatar')} aria-hidden="true">{unitGlyph(occupant)}<i style={{ width: (occupant.hp / occupant.maxHp * 100) + '%' }} /></span>}
-                </button>
-              )
-            }))}
-          </div>
-        </div>
-      )}
+      <TacticalBoard combat={combat} canAct={isPlayerTurn} selectedTargetId={selectedTarget?.id} onCellClick={onCellClick} />
       <div className="battlefield">
         <div className="battle-side">
           <div className="battle-side-heading"><span>TES CHEVALIERS</span><span>{livingAllies.length}/{allies.length} actifs</span></div>
