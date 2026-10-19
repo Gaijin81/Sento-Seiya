@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - "feature/**"
+      - "chore/**"
+      - "fix/**"
   pull_request:
     branches:
       - main
@@ -22,6 +24,8 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install
+      - name: Security audit (high and critical)
+        run: npm audit --audit-level=high
       - name: Unit tests
         run: npm test
       - name: Type-check and build
