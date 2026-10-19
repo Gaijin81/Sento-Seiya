@@ -16,8 +16,9 @@ export default function CombatArena({ onBack, onProgressionChanged }: Props) {
   const [combatId, setCombatId] = useState(() => createCombatId())
   const [progression, setProgression] = useState<ProgressionState>(() => {
     if (typeof window === 'undefined') return createInitialProgression()
-    return loadProgression(window.localStorage)
+    try { return loadProgression(window.localStorage) } catch { return createInitialProgression() }
   })
+  const [saveWarning, setSaveWarning] = useState(false)
   const [targetId, setTargetId] = useState('black-pega')
   const [feedback, setFeedback] = useState('Choisis une action pour commencer le combat.')
   const active = getActiveUnit(combat)
@@ -43,8 +44,9 @@ export default function CombatArena({ onBack, onProgressionChanged }: Props) {
         onProgressionChanged?.(rewarded)
         try {
           if (typeof window !== 'undefined') saveProgression(window.localStorage, rewarded)
+          setSaveWarning(false)
         } catch {
-          setFeedback('Victoire ! Les récompenses sont attribuées, mais le navigateur a bloqué la sauvegarde locale.')
+          setSaveWarning(true)
         }
       }
     }
@@ -116,7 +118,7 @@ export default function CombatArena({ onBack, onProgressionChanged }: Props) {
           <button className="combat-action" onClick={() => act({ type: 'focus' })} disabled={!isPlayerTurn || !active || active.cosmos >= active.maxCosmos}><Sparkles size={18} /><span><strong>Concentration</strong><small>Récupère jusqu’à 2 Cosmos</small></span></button>
         </div>
         <div className="combat-feedback" aria-live="polite">{feedback}</div>
-        {combat.status === 'victory' && <div className="victory-reward" role="status"><Trophy size={16} /> Victoire récompensée : +{VICTORY_XP} XP pour chacun de tes chevaliers. Progression sauvegardée sur cet appareil.</div>}
+        {combat.status === 'victory' && <div className="victory-reward" role="status"><Trophy size={16} /> Victoire récompensée : +{VICTORY_XP} XP pour chacun de tes chevaliers. {saveWarning ? 'Attention : le navigateur a bloqué la sauvegarde locale.' : 'Progression sauvegardée sur cet appareil.'}</div>}
         {combat.status !== 'ongoing' && <button className="primary-button rematch-button" onClick={reset}><RotateCcw size={16} /> Recommencer le combat</button>}
       </div>
       <div className="panel combat-log"><div className="panel-heading"><div><div className="eyebrow">CHRONIQUE DU COMBAT</div><h2>Journal des actions</h2></div><span className="log-count">{combat.log.length} action(s)</span></div>
