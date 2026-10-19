@@ -71,4 +71,6 @@ export type CampaignState = {
   /** `node:choice` keys whose rewards were already granted, kept across replays. */
   rewarded: string[]
   completed: boolean
+  /** Reached the ending at least once; kept when the chapter is replayed. */
+  cleared?: boolean
 }

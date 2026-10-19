@@ -26,6 +26,8 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
   { id: 'larme-etoile', name: 'Larme d’étoile filante', slot: 'charm', cost: 0, rarity: 'rare', description: 'Une goutte de lumière tombée du ciel le soir du tournoi.', bonus: { hp: 6, speed: 1 } },
   { id: 'fragment-argent', name: 'Fragment d’armure d’argent', slot: 'relic', cost: 0, rarity: 'rare', description: 'Arraché à l’armure noire du chef masqué : de l’argent véritable.', bonus: { attack: 2, defense: 1 } },
   { id: 'eclat-or', name: 'Éclat d’armure d’or', slot: 'charm', cost: 0, rarity: 'legendary', description: 'Confié en signe de respect. Il brille comme le Sagittaire.', bonus: { hp: 10, defense: 1, maxCosmos: 1 } },
+  { id: 'plume-phenix', name: 'Plume de feu', slot: 'relic', cost: 0, rarity: 'rare', description: 'Trouvée dans la grotte sous le volcan. Elle ne refroidit jamais.', bonus: { attack: 1, speed: 2 } },
+  { id: 'cendre-phenix', name: 'Cendres du Phénix', slot: 'charm', cost: 0, rarity: 'legendary', description: 'Ce qui reste du masque brisé. On dit que le Phénix renaît toujours.', bonus: { hp: 8, attack: 2 } },
 ]
 
 let extraItems: EquipmentItem[] = []

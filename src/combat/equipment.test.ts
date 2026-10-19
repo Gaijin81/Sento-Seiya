@@ -16,7 +16,7 @@ describe('rare items', () => {
     const forged = forgeItem(rich, 'fragment-argent')
     expect(forged.ok).toBe(false)
     expect(!forged.ok && forged.error).toContain('se trouve en campagne')
-    expect(EQUIPMENT_CATALOG.filter((item) => !isForgeable(item)).map((item) => item.rarity)).toEqual(['rare', 'rare', 'legendary'])
+    expect(EQUIPMENT_CATALOG.filter((item) => !isForgeable(item)).map((item) => item.rarity)).toEqual(['rare', 'rare', 'legendary', 'rare', 'legendary'])
     expect(grantItems(rich, ['fragment-argent', 'inconnu']).inventory).toEqual(['fragment-argent'])
   })
 })
