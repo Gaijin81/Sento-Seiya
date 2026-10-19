@@ -76,7 +76,7 @@ export const CHAPTER_ONE: Chapter = {
       id: 'repaire', kind: 'boss', title: 'Le chef des chevaliers noirs', x: 5, y: 1,
       text: '« Le Sagittaire n’appartient à personne », gronde le chef masqué. Des flammes noires dévorent l’air autour de lui. Derrière, un dernier chevalier noir lève sa garde.',
       choices: [
-        { id: 'affronter', label: 'L’affronter', goTo: 'epilogue', combat: 'boss', effects: { flags: ['vainqueur'] }, outcome: 'Le chef masqué s’effondre et s’enfuit dans l’ombre, laissant l’urne derrière lui.' },
+        { id: 'affronter', label: 'L’affronter', goTo: 'epilogue', combat: 'boss', effects: { flags: ['vainqueur'], stardust: 30 }, outcome: 'Le chef masqué s’effondre et s’enfuit dans l’ombre, laissant l’urne derrière lui. Tu récupères 30 poussières d’étoiles sur son armure brisée.' },
         { id: 'loyaute', label: 'Lui proposer un duel loyal au tournoi', goTo: 'epilogue', requires: { flag: 'honnete' }, effects: { flags: ['paix'], shards: 30 }, outcome: 'Touché par ta droiture, il dépose l’urne et 30 éclats en signe de respect, puis disparaît.' },
       ],
     },

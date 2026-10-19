@@ -15,6 +15,7 @@ export type Requirement = {
 export type Effects = {
   flags?: string[]
   shards?: number
+  stardust?: number
   recruit?: string
 }
 

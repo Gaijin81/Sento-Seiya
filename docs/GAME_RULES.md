@@ -127,6 +127,15 @@ L'arène de démonstration oppose l'escouade du joueur (1 à 3 chevaliers) à de
 - Quand la main passe d'un joueur humain à l'autre, un écran demande de passer l'appareil avant d'afficher le plateau.
 - Les parties locales ne donnent ni XP ni éclats et ne modifient pas la sauvegarde.
 
+## 6 septies. Équipement et poussières d'étoiles
+
+- Chaque victoire rapporte 10 poussières d'étoiles (en plus de l'XP et des éclats) ; certains choix de campagne en donnent aussi (30 pour le boss du chapitre 1).
+- La forge (page Équipe) transforme les poussières en objets. Un objet peut être forgé plusieurs fois ; chaque exemplaire équipe un seul chevalier.
+- Chaque chevalier a deux emplacements : une relique et un talisman. Équiper un objet remplace celui de l'emplacement, qui retourne dans l'inventaire.
+- Les bonus s'ajoutent aux statistiques du niveau dès le combat suivant : PV, attaque, défense, vitesse, Cosmos max, déplacement ou portée de technique.
+- Les parties locales (PvP / coop) n'utilisent pas l'équipement, pour rester équitables.
+- Sauvegarde v3 : les sauvegardes v1 et v2 sont migrées automatiquement, sans poussières ni objets.
+
 ## 7. Modes prévus
 
 - **PvE** : le joueur affronte des unités contrôlées par l'IA.

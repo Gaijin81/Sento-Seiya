@@ -1,10 +1,12 @@
 import type { CombatState } from './types'
 import { getKnightDefinition, STARTER_KNIGHT_IDS } from './knights'
+import { normalizeEquipment, normalizeInventory, type Loadout } from './equipment'
 
 export const SAVE_KEY = 'sento-seiya-progress'
-export const SAVE_VERSION = 2
+export const SAVE_VERSION = 3
 export const VICTORY_XP = 50
 export const VICTORY_SHARDS = 30
+export const VICTORY_STARDUST = 10
 export const MAX_SQUAD_SIZE = 3
 
 export type KnightProgress = {
@@ -23,6 +25,9 @@ export type ProgressionState = {
   claimedCombatIds: string[]
   knights: KnightProgress[]
   squad: string[]
+  stardust: number
+  inventory: string[]
+  equipment: Record<string, Loadout>
 }
 
 export type StorageLike = Pick<Storage, 'getItem' | 'setItem'>
@@ -42,6 +47,9 @@ export function createInitialProgression(): ProgressionState {
     claimedCombatIds: [],
     knights: STARTER_KNIGHT_IDS.map(createKnightProgress),
     squad: [...STARTER_KNIGHT_IDS],
+    stardust: 0,
+    inventory: [],
+    equipment: {},
   }
 }
 
@@ -107,11 +115,18 @@ export function parseProgression(value: unknown): ProgressionState | null {
       claimedCombatIds: [...new Set(candidate.claimedCombatIds)],
       knights,
       squad: normalizeSquad(STARTER_KNIGHT_IDS, knights),
+      stardust: 0,
+      inventory: [],
+      equipment: {},
     }
   }
 
-  if (candidate.version === SAVE_VERSION && isCount(candidate.cosmosShards)) {
+  if ((candidate.version === 2 || candidate.version === SAVE_VERSION) && isCount(candidate.cosmosShards)) {
+    // v2 saves predate equipment: they start with no stardust and an empty inventory.
+    const current = candidate.version === SAVE_VERSION
+    if (current && (!isCount(candidate.stardust) || !Array.isArray(candidate.inventory))) return null
     const knights = normalizeKnights(candidate.knights)
+    const inventory = current ? normalizeInventory(candidate.inventory as unknown[]) : []
     return {
       version: SAVE_VERSION,
       playerXp: candidate.playerXp,
@@ -120,6 +135,9 @@ export function parseProgression(value: unknown): ProgressionState | null {
       claimedCombatIds: [...new Set(candidate.claimedCombatIds)],
       knights,
       squad: normalizeSquad(candidate.squad, knights),
+      stardust: current ? candidate.stardust as number : 0,
+      inventory,
+      equipment: current ? normalizeEquipment(candidate.equipment, knights, inventory) : {},
     }
   }
 
@@ -168,6 +186,7 @@ export function awardVictoryXp(
     playerXp: progression.playerXp + VICTORY_XP,
     victories: progression.victories + 1,
     cosmosShards: progression.cosmosShards + VICTORY_SHARDS,
+    stardust: progression.stardust + VICTORY_STARDUST,
     claimedCombatIds: [...progression.claimedCombatIds, combatId],
     knights,
   }

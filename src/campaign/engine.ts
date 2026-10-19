@@ -52,6 +52,7 @@ function resolve(chapter: Chapter, state: CampaignState, progression: Progressio
   let next = progression
   if (!state.rewarded.includes(key)) {
     if (effects.shards) next = { ...next, cosmosShards: Math.max(0, next.cosmosShards + effects.shards) }
+    if (effects.stardust) next = { ...next, stardust: Math.max(0, next.stardust + effects.stardust) }
     if (effects.recruit) next = recruit(next, effects.recruit)
   }
   return {
@@ -65,7 +66,7 @@ function resolve(chapter: Chapter, state: CampaignState, progression: Progressio
       flags: [...new Set([...state.flags, ...(effects.flags ?? [])])],
       history: [...state.history, { nodeId: node.id, choiceId: choice.id }],
       pending: null,
-      rewarded: state.rewarded.includes(key) || (!effects.shards && !effects.recruit) ? state.rewarded : [...state.rewarded, key],
+      rewarded: state.rewarded.includes(key) || (!effects.shards && !effects.stardust && !effects.recruit) ? state.rewarded : [...state.rewarded, key],
       completed: destination.kind === 'ending',
     },
   }

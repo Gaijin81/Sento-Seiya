@@ -135,7 +135,7 @@ describe('save migration and persistence', () => {
       ],
     }
     const migrated = loadProgression(memoryStorage(JSON.stringify(v1)))
-    expect(migrated).toMatchObject({ version: 2, playerXp: 150, victories: 3, cosmosShards: 3 * VICTORY_SHARDS, squad: ['seiya', 'shiryu', 'hyoga'] })
+    expect(migrated).toMatchObject({ version: 3, stardust: 0, inventory: [], equipment: {}, playerXp: 150, victories: 3, cosmosShards: 3 * VICTORY_SHARDS, squad: ['seiya', 'shiryu', 'hyoga'] })
     expect(migrated.claimedCombatIds).toEqual(['a', 'b', 'c'])
     expect(migrated.knights.every((knight) => knight.level === 2)).toBe(true)
   })

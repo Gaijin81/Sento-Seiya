@@ -176,3 +176,11 @@ button.battle-unit.enemy:disabled{cursor:default}
 .versus-unit .battle-avatar{width:32px;height:32px;font-size:17px}
 .versus-unit.unit-active{border-color:var(--gold)}
 @media(max-width:700px){.versus-setup{grid-template-columns:1fr}}
+.gear-slots{display:grid;gap:6px;margin:10px 0}
+.gear-slot{display:grid;grid-template-columns:70px minmax(0,1fr);align-items:center;gap:8px;font-size:10px;color:var(--muted)}
+.gear-slot select{width:100%;min-width:0;padding:7px 8px;border:1px solid var(--line);border-radius:7px;background:#171d2b;color:#eef0f7;font-size:11px}
+.forge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:24px}
+.forge-item h3{margin:6px 0;font:600 16px Manrope,sans-serif}
+.forge-item p{margin:0 0 8px;color:var(--muted);font-size:11px;line-height:1.6}
+.gear-bonus{display:block;color:var(--jade);font-size:12px;margin-bottom:8px}
+.forge-item .secondary-button{width:100%;justify-content:center;margin-top:8px}
