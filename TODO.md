@@ -13,13 +13,13 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 
 ## Prochaine feature — moteur de combat tactique
 
-- [ ] Définir les types de combat et les statistiques de chevalier.
-- [ ] Implémenter les tours, l'ordre d'initiative et les actions.
-- [ ] Implémenter attaque, défense, dépense/récupération de Cosmos et techniques.
-- [ ] Implémenter les conditions de victoire/défaite et l'état de combat.
-- [ ] Ajouter un adversaire IA de base.
-- [ ] Ajouter des tests unitaires déterministes pour les règles du moteur.
-- [ ] Faire réussir les tests et le build dans GitHub Actions.
+- [x] Définir les types de combat et les statistiques de chevalier.
+- [x] Implémenter les tours, l'ordre d'initiative et les actions.
+- [x] Implémenter attaque, défense, dépense/récupération de Cosmos et techniques.
+- [x] Implémenter les conditions de victoire/défaite et l'état de combat.
+- [x] Ajouter un adversaire IA de base.
+- [x] Ajouter des tests unitaires déterministes pour les règles du moteur.
+- [x] Faire réussir les tests et le build dans GitHub Actions.
 - [ ] Créer une PR dédiée; ne pas mélanger cette feature aux autres.
 
 ## Progression et collection
