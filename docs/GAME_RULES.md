@@ -73,7 +73,9 @@ L'IA doit être déterministe pour les tests, avec une stratégie simple :
 Sur un plateau, l'IA tactique :
 1. lance sa technique si elle a assez de Cosmos et qu'une cible est à portée ;
 2. sinon attaque une cible à portée ;
-3. sinon, si elle ne s'est pas encore déplacée, avance vers l'adversaire le plus proche (case la plus proche de lui, égalités tranchées par ligne puis colonne), puis rejoue ;
+1. si elle ne s'est pas encore déplacée, note chaque case accessible (et sa case actuelle) : une case d'où elle peut frapper vaut 100, plus 2 pour une couverture, 1 pour une hauteur ou une source de Cosmos (si son Cosmos n'est pas plein) ; une case d'où elle ne peut pas frapper vaut le bonus de terrain moins 10 par case de distance à l'adversaire le plus proche. Elle se déplace si une case fait strictement mieux que sa position (égalités tranchées par ligne puis colonne), puis rejoue ;
+2. lance sa technique si elle a assez de Cosmos et qu'une cible est à portée ;
+3. sinon attaque une cible à portée ;
 4. sinon termine son tour.
 
 Une future IA plus élaborée pourra évaluer les soins, la garde, les synergies, les objectifs et le terrain.
@@ -161,6 +163,7 @@ L'arène de démonstration oppose l'escouade du joueur (1 à 3 chevaliers) à de
 - Réglée dans Options et sauvegardée (`sento-seiya-difficulty`), elle s'applique aux combats contre l'IA (arènes et campagne), pas aux parties locales.
 - Facile : adversaires −20 % PV et −2 ATQ (minimum 1). Normal : statistiques prévues. Difficile : adversaires +25 % PV, +2 ATQ, +1 DÉF.
 - Les chevaliers du joueur et les récompenses ne changent pas.
+- Difficulté progressive (Options, `sento-seiya-adaptive`, activée par défaut) : chaque combat a un niveau prévu (`Encounter.level`, 1 par défaut). Pour chaque niveau d'écart entre le niveau moyen de l'escouade (arrondi à l'inférieur) et ce niveau prévu, les adversaires gagnent +8 % PV, +1 ATQ et +1 DÉF tous les 2 niveaux, jusqu'à +5 niveaux. Le bonus s'affiche dans le bandeau du combat.
 
 ## 6 terdecies. Terrain du plateau
 

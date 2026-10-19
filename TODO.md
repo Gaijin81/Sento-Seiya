@@ -69,7 +69,9 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 - [x] Tests du plateau, du déplacement, des portées, du placement et de l'IA.
 - [x] Grille interactive dans l'arène (tactile et souris) : cases accessibles, cibles à portée, obstacles.
 - [x] Terrain avancé : couverture (−2 dégâts subis), hauteur (+1 portée d'attaque et de technique), sources de Cosmos (+1 Cosmos en s'y arrêtant), symétriques dans l'arène.
-- [ ] IA qui recherche activement la couverture et la hauteur.
+- [x] IA qui recherche activement la couverture et la hauteur : avant d'agir, elle se déplace vers la meilleure case d'où frapper (couverture > hauteur/source de Cosmos), sinon se rapproche en privilégiant le terrain.
+- [x] Difficulté progressive (Options, activée par défaut) : adversaires renforcés quand le niveau moyen de l'escouade dépasse le niveau prévu du combat (chapitre 1 : 1, boss : 2, chapitre 2 : 3, chapitre 3 : 5), jusqu'à +5 niveaux.
+- [x] La difficulté choisie s'applique aussi aux combats de campagne (elle n'était appliquée qu'aux arènes).
 
 ## Plateau d'aventure et choix multiples — `feature/campaign-board`
 

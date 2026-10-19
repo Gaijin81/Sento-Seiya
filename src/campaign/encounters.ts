@@ -34,6 +34,7 @@ export const ENCOUNTERS: Record<string, Encounter> = {
   },
   'c2-recifs': {
     id: 'c2-recifs',
+    level: 3,
     title: 'Les récifs noirs',
     enemies: [
       enemy('black-swan', 'Cygne noir', { hp: 34, attack: 9, defense: 2, speed: 8, cosmos: 2 }, { x: 6, y: 1 }, { name: 'Blizzard obscur', cost: 2, power: 7, range: 3 }),
@@ -42,6 +43,7 @@ export const ENCOUNTERS: Record<string, Encounter> = {
   },
   'c2-volcan': {
     id: 'c2-volcan',
+    level: 3,
     title: 'La pente de lave',
     enemies: [
       enemy('black-andromeda', 'Andromède noir', { hp: 36, attack: 8, defense: 3, speed: 7, cosmos: 2 }, { x: 6, y: 1 }, { name: 'Chaîne des ténèbres', cost: 2, power: 6, range: 3 }),
@@ -51,6 +53,7 @@ export const ENCOUNTERS: Record<string, Encounter> = {
   },
   'c2-phenix': {
     id: 'c2-phenix',
+    level: 3,
     title: 'Le Phénix masqué',
     enemies: [
       enemy('masked-phoenix', 'Phénix masqué', { hp: 80, attack: 12, defense: 5, speed: 11, cosmos: 4, maxCosmos: 7 }, { x: 6, y: 2 }, { name: 'Plumes ardentes', cost: 3, power: 11, range: 2 }),
@@ -60,6 +63,7 @@ export const ENCOUNTERS: Record<string, Encounter> = {
   },
   'c3-gardes': {
     id: 'c3-gardes',
+    level: 5,
     title: 'La porte du Sanctuaire',
     enemies: [
       enemy('guard-1', 'Garde du Sanctuaire', { hp: 34, attack: 9, defense: 3, speed: 6 }, { x: 6, y: 1 }),
@@ -69,6 +73,7 @@ export const ENCOUNTERS: Record<string, Encounter> = {
   },
   'c3-argent': {
     id: 'c3-argent',
+    level: 5,
     title: 'L’arène des apprentis',
     enemies: [
       enemy('silver-hound', 'Chevalier d’argent du Limier', { hp: 46, attack: 11, defense: 4, speed: 10, cosmos: 2, maxCosmos: 5 }, { x: 6, y: 1 }, { name: 'Morsure d’argent', cost: 2, power: 8, range: 1 }),
@@ -78,6 +83,7 @@ export const ENCOUNTERS: Record<string, Encounter> = {
   },
   'c3-gardien': {
     id: 'c3-gardien',
+    level: 5,
     title: 'Le gardien de la Première Maison',
     enemies: [
       enemy('gold-guardian', 'Gardien d’or de la Première Maison', { hp: 96, attack: 13, defense: 6, speed: 10, cosmos: 4, maxCosmos: 8 }, { x: 6, y: 2 }, { name: 'Mur de cristal brisé', cost: 3, power: 12, range: 2 }),
@@ -87,6 +93,7 @@ export const ENCOUNTERS: Record<string, Encounter> = {
   },
   boss: {
     id: 'boss',
+    level: 2,
     title: 'Le chef des chevaliers noirs',
     enemies: [
       enemy('black-chief', 'Chef des chevaliers noirs', { hp: 64, attack: 11, defense: 4, speed: 8, cosmos: 3, maxCosmos: 6 }, { x: 6, y: 2 }, { name: 'Flammes noires', cost: 3, power: 9, range: 2 }),

@@ -5,6 +5,7 @@ import type {
   CombatAction,
   CombatState,
   CombatUnit,
+  Position,
   Team,
   UnitSetup,
 } from './types'
@@ -198,9 +199,26 @@ function pickTarget(targets: CombatUnit[]): CombatUnit | undefined {
   return [...targets].sort((a, b) => a.hp - b.hp || a.id.localeCompare(b.id))[0]
 }
 
+const TERRAIN_VALUE = { cover: 2, height: 1, cosmos: 1 } as const
+
+/** How attractive ending a move on `cell` is: being able to strike dominates, then terrain, then closing the gap. */
+function cellScore(state: CombatState, actor: CombatUnit, cell: Position, foes: CombatUnit[]): number {
+  const shadow = { ...actor, position: cell }
+  const technique = actor.technique
+  const canUseTechnique = Boolean(technique && technique.power > 0 && actor.cosmos >= technique.cost)
+  const range = Math.max(attackRange(actor), canUseTechnique ? techniqueRange(actor) : 0)
+  const strikes = foes.some((foe) => isWithinRange(state, shadow, foe, range))
+  const kind = terrainAt(state.board, cell)
+  const moving = !samePosition(cell, actor.position!)
+  const terrain = !kind || (kind === 'cosmos' && (!moving || actor.cosmos >= actor.maxCosmos)) ? 0 : TERRAIN_VALUE[kind]
+  const gap = Math.min(...foes.map((foe) => distance(cell, foe.position!)))
+  return strikes ? 100 + terrain : terrain - gap * 10
+}
+
 /**
- * Deterministic tactical policy usable for any team: strike the weakest foe in range
- * (technique first when affordable), otherwise close in on the nearest foe, otherwise end the turn.
+ * Deterministic tactical policy usable for any team. Before acting, it moves when a reachable cell
+ * scores better (a cell to strike from, ideally on cover, high ground or a Cosmos spring); then it strikes
+ * the weakest foe in range (technique first when affordable), otherwise ends the turn.
  */
 export function chooseTacticalAction(state: CombatState, actorId: string): CombatAction | null {
   if (state.status !== 'ongoing') return null
@@ -210,6 +228,15 @@ export function chooseTacticalAction(state: CombatState, actorId: string): Comba
   const foes = state.units.filter((unit) => unit.team !== actor.team && unit.hp > 0)
   if (foes.length === 0) return null
 
+  if (state.board && actor.position && !alreadyMoved) {
+    const origin = actor.position
+    const here = cellScore(state, actor, origin, foes)
+    const best = reachableCells(state, actor.id)
+      .map((cell) => ({ cell, score: cellScore(state, actor, cell, foes) }))
+      .sort((a, b) => b.score - a.score || a.cell.y - b.cell.y || a.cell.x - b.cell.x)[0]
+    if (best && best.score > here) return { type: 'move', to: best.cell }
+  }
+
   const technique = actor.technique
   if (technique && technique.power > 0 && actor.cosmos >= technique.cost) {
     const target = pickTarget(foes.filter((foe) => isWithinRange(state, actor, foe, techniqueRange(actor))))
@@ -217,17 +244,6 @@ export function chooseTacticalAction(state: CombatState, actorId: string): Comba
   }
   const target = pickTarget(foes.filter((foe) => isWithinRange(state, actor, foe, attackRange(actor))))
   if (target) return { type: 'attack', targetId: target.id }
-
-  if (state.board && actor.position && !alreadyMoved) {
-    const origin = actor.position
-    const nearest = [...foes].sort((a, b) =>
-      distance(origin, a.position!) - distance(origin, b.position!) || a.hp - b.hp || a.id.localeCompare(b.id))[0]
-    const goal = nearest.position!
-    const best = reachableCells(state, actor.id)
-      .map((cell) => ({ cell, gap: distance(cell, goal) }))
-      .sort((a, b) => a.gap - b.gap || a.cell.y - b.cell.y || a.cell.x - b.cell.x)[0]
-    if (best && best.gap < distance(origin, goal)) return { type: 'move', to: best.cell }
-  }
   return { type: 'wait' }
 }
 

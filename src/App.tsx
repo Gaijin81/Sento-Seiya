@@ -3,7 +3,7 @@ import { parseProgression, VICTORY_STARDUST, createInitialProgression, loadProgr
 import { createKnightUnit, getKnightDefinition, knightStatsAtLevel, type KnightDefinition } from './combat/knights'
 import { getRecruitableKnights, getRecruitStatus, recruitKnight, toggleSquadMember, type ProgressionResult } from './combat/recruitment'
 import CombatArena from './combat/CombatArena'
-import { DIFFICULTIES, DIFFICULTY_INFO, loadDifficulty, saveDifficulty, type Difficulty } from './combat/difficulty'
+import { DIFFICULTIES, DIFFICULTY_INFO, loadAdaptive, loadDifficulty, MAX_ADAPTIVE_GAP, saveAdaptive, saveDifficulty, type Difficulty } from './combat/difficulty'
 import { audio, THEME_LABELS, THEMES, type Theme } from './audio/engine'
 import { loadAudioSettings, saveAudioSettings, type AudioSettings } from './audio/settings'
 import { activatePacks, installPack, loadInstalledPacks, saveInstalledPacks, uninstallPack, type ContentPack } from './dlc/manifest'
@@ -125,6 +125,12 @@ export default function App() {
   const [packs, setPacks] = useState<ContentPack[]>(() => BOOT_PACKS)
   const [packErrors, setPackErrors] = useState<string[]>([])
   const [difficulty, setDifficulty] = useState<Difficulty>(() => (typeof window === 'undefined' ? 'normal' : loadDifficulty(window.localStorage)))
+  const [adaptive, setAdaptive] = useState(() => (typeof window === 'undefined' ? true : loadAdaptive(window.localStorage)))
+  const changeAdaptive = (next: boolean) => {
+    setAdaptive(next)
+    try { saveAdaptive(window.localStorage, next) } catch { /* setting stays in memory */ }
+    setNotice(`Difficulté progressive ${next ? 'activée' : 'désactivée'}.`)
+  }
   const changeDifficulty = (next: Difficulty) => {
     setDifficulty(next)
     try { saveDifficulty(window.localStorage, next) } catch { /* setting stays in memory */ }
@@ -282,6 +288,8 @@ export default function App() {
         {activeSection === 'Campagne' && campaignFight && ENCOUNTERS[campaignFight] && (
           <CombatArena
             key={campaignFight}
+            difficulty={difficulty}
+            adaptive={adaptive}
             progression={progression}
             onProgressionChanged={commitProgression}
             encounter={ENCOUNTERS[campaignFight]}
@@ -461,6 +469,7 @@ export default function App() {
                 <div className="difficulty-options" role="radiogroup" aria-label="Difficulté">{DIFFICULTIES.map((entry) => (
                   <button key={entry} role="radio" aria-checked={difficulty === entry} className={`difficulty-option ${difficulty === entry ? 'active' : ''}`} onClick={() => changeDifficulty(entry)}><strong>{DIFFICULTY_INFO[entry].label}</strong><small>{DIFFICULTY_INFO[entry].description}</small></button>
                 ))}</div>
+                <label className="adaptive-row"><input type="checkbox" checked={adaptive} onChange={(event) => changeAdaptive(event.target.checked)} /><span><strong>Difficulté progressive</strong><small>Quand le niveau moyen de ton escouade dépasse celui prévu pour un combat, les adversaires se renforcent (jusqu’à +{MAX_ADAPTIVE_GAP} niveaux).</small></span></label>
                 <p className="control-hint">Les récompenses ne changent pas. Les parties locales (duel et coop) ne sont pas affectées.</p>
               </article>
               <article className="panel">
@@ -487,7 +496,7 @@ export default function App() {
             </div>
           </section>
         )}
-        {activeSection === 'Combat' && <CombatArena difficulty={difficulty} progression={progression} onProgressionChanged={commitProgression} onBack={() => setActiveSection('Arènes')} onEditSquad={() => setActiveSection('Équipe')} />}
+        {activeSection === 'Combat' && <CombatArena difficulty={difficulty} adaptive={adaptive} progression={progression} onProgressionChanged={commitProgression} onBack={() => setActiveSection('Arènes')} onEditSquad={() => setActiveSection('Équipe')} />}
 
         {activeSection === 'Codex' && <CodexPage progression={progression} campaigns={campaignStates} />}
 

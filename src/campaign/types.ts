@@ -56,6 +56,8 @@ export type Chapter = {
 export type Encounter = {
   id: string
   title: string
+  /** Squad level the encounter is tuned for (progressive difficulty); defaults to 1. */
+  level?: number
   enemies: UnitSetup[]
 }
 

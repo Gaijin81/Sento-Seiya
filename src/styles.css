@@ -245,3 +245,4 @@ main:focus{outline:none}
 .skip-link:focus{transform:none}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 .forge-level{display:inline-block;margin-top:14px;font-size:10px;color:var(--gold)}
+.adaptive-row{display:flex;gap:10px;align-items:flex-start;margin:4px 0 10px;cursor:pointer}.adaptive-row input{margin-top:3px;accent-color:var(--gold)}.adaptive-row span{display:grid;gap:3px}.adaptive-row small{color:var(--muted);font-size:10px}
