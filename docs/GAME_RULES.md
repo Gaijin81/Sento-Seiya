@@ -189,6 +189,13 @@ L'arène de démonstration oppose l'escouade du joueur (1 à 3 chevaliers) à de
 - Après une première visite, le jeu se lance sans connexion ; les sauvegardes restent locales (`localStorage`).
 - Changer `CACHE` dans `sw.js` force le renouvellement du cache.
 
+## 6 decies. Accessibilité
+
+- Plateau tactique : une seule case est dans l'ordre de tabulation ; les flèches parcourent la grille (Début/Fin vont aux bords de la ligne) et Entrée ou Espace déclenche le déplacement ou la visée. Les cases non jouables restent lisibles (`aria-disabled`) au lieu d'être sautées.
+- Chaque case annonce sa position, son terrain, son occupant, ses PV et si elle est jouable.
+- Lien « Aller au contenu » au premier Tab, page active marquée `aria-current`, Échap ferme le menu mobile.
+- Les textes secondaires respectent un contraste d'au moins 4,5:1 ; `prefers-reduced-motion` coupe les animations.
+
 ## 7. Modes prévus
 
 - **PvE** : le joueur affronte des unités contrôlées par l'IA.
