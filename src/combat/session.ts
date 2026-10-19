@@ -30,8 +30,12 @@ export function createSquadUnits(progression: ProgressionState): UnitSetup[] {
   }).slice(0, PLAYER_SPAWNS.length).map((unit, index) => ({ ...unit, position: { ...PLAYER_SPAWNS[index] } }))
 }
 
+export function createEncounterCombat(progression: ProgressionState, enemies: UnitSetup[], board: Board = ARENA_BOARD): CombatState {
+  return createCombat([...createSquadUnits(progression), ...enemies], board)
+}
+
 export function createSquadCombat(progression: ProgressionState): CombatState {
-  return createCombat([...createSquadUnits(progression), ...DEMO_ENEMIES], ARENA_BOARD)
+  return createEncounterCombat(progression, DEMO_ENEMIES)
 }
 
 export function playActionAndResolveAi(state: CombatState, actorId: string, action: CombatAction): ActionResult {
