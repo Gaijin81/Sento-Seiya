@@ -126,6 +126,12 @@ L'arène de démonstration oppose l'escouade du joueur (1 à 3 chevaliers) à de
 - Les identifiants de cases sont uniques entre chapitres (préfixe `c2-` pour le chapitre 2) : les récompenses déjà obtenues ne sont jamais redonnées.
 - Chapitre 2, « L'ombre du Phénix » : Ikki rejoint l'équipe en battant le Phénix masqué, ou sans combat si le joueur a médité à la source. Certains choix demandent Shun ou Hyoga dans l'escouade, ou 30 éclats de Cosmos.
 
+## 6 quinquies ter. Codex
+
+- Le codex est calculé à partir des sauvegardes (progression et campagne de chaque chapitre), sans stockage supplémentaire.
+- Chevaliers : découverts une fois recrutés. Adversaires : découverts quand la case de leur combat a été atteinte. Lieux : cases visitées. Objets : objets de forge toujours connus, trésors une fois obtenus. Chroniques : chapitres commencés, avec les choix marquants.
+- Une entrée non découverte s'affiche « ??? » avec un indice pour la trouver.
+
 ## 6 sexies. Parties locales (même appareil)
 
 - **Joueur contre Joueur** : le Joueur 1 joue le camp gauche, le Joueur 2 le camp droit ; chacun engage 1 à 3 chevaliers (le même chevalier peut être dans les deux camps). Aucune IA n'agit.

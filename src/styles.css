@@ -225,3 +225,13 @@ button.battle-unit.enemy:disabled{cursor:default}
 .chapter-tab.active{border-color:var(--gold);color:var(--gold)}
 .chapter-tab:disabled{opacity:.5;cursor:not-allowed}
 @media(max-width:600px){.chapter-tab{flex:1 1 100%}}
+.codex-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.codex-tab{border:1px solid var(--line);background:transparent;border-radius:8px;padding:8px 12px;color:#a3abc0;font-size:11px}
+.codex-tab small{color:var(--muted);margin-left:4px}
+.codex-tab.active{border-color:var(--gold);color:var(--gold)}
+.codex-entries{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.codex-entry{background:#101626;border:1px solid var(--line);border-radius:12px;padding:16px}
+.codex-entry h2{display:flex;align-items:center;gap:6px;font:700 14px Manrope,sans-serif;margin:0 0 6px}
+.codex-subtitle{display:block;font-size:9px;letter-spacing:.4px;color:#b7a1ff;margin-bottom:8px}
+.codex-entry p{font-size:10px;line-height:1.7;color:#929bb0;margin:0}
+.codex-entry.undiscovered{opacity:.55;border-style:dashed}

@@ -10,6 +10,7 @@ import { activatePacks, installPack, loadInstalledPacks, saveInstalledPacks, uni
 import { EXAMPLE_PACK } from './dlc/examplePack'
 import { applyEquipment, availableCount, bonusLabel, allItems, equipItem, EQUIPMENT_SLOTS, isForgeable, RARITY_LABELS, forgeItem, getItem, ownedCount, SLOT_LABELS, unequipItem } from './combat/equipment'
 import CampaignBoard from './campaign/CampaignBoard'
+import CodexPage from './codex/CodexPage'
 import LocalVersus from './versus/LocalVersus'
 import type { LocalMode } from './versus/match'
 import { CHAPTERS, getChapter, isChapterUnlocked } from './campaign/chapters'
@@ -112,10 +113,11 @@ export default function App() {
     try { return loadCampaign(window.localStorage, CHAPTERS[0]) } catch { return createCampaign(CHAPTERS[0]) }
   })
   const chapter = getChapter(campaign.chapterId) ?? CHAPTERS[0]
-  const clearedChapters = CHAPTERS.filter((entry) => {
-    if (entry.id === campaign.chapterId) return Boolean(campaign.cleared)
-    try { return typeof window !== 'undefined' && Boolean(loadCampaign(window.localStorage, entry).cleared) } catch { return false }
-  }).map((entry) => entry.id)
+  const campaignStates = CHAPTERS.map((entry) => {
+    if (entry.id === campaign.chapterId) return campaign
+    try { return typeof window === 'undefined' ? createCampaign(entry) : loadCampaign(window.localStorage, entry) } catch { return createCampaign(entry) }
+  })
+  const clearedChapters = campaignStates.filter((state) => state.cleared).map((state) => state.chapterId)
   const [campaignOutcome, setCampaignOutcome] = useState('')
   const [campaignFight, setCampaignFight] = useState<string | null>(null)
   const [localMode, setLocalMode] = useState<LocalMode>('pvp')
@@ -248,7 +250,7 @@ export default function App() {
             <div className="cosmos-icon"><Flame size={19} /></div>
             <div><strong>Éveille ton Cosmos</strong><p>Chaque bataille te rapproche des étoiles.</p></div>
           </div>
-          <button className="help-link" onClick={() => setNotice('Le guide du jeu sera disponible avec la fonctionnalité Codex.')}><CircleHelp size={16} /> Guide de l’aventurier</button>
+          <button className="help-link" onClick={() => { setActiveSection('Codex'); setMobileMenu(false) }}><CircleHelp size={16} /> Guide de l’aventurier</button>
           <div className="version">VERSION 0.1.0 · PROTOTYPE</div>
         </div>
       </aside>
@@ -468,7 +470,7 @@ export default function App() {
         )}
         {activeSection === 'Combat' && <CombatArena difficulty={difficulty} progression={progression} onProgressionChanged={commitProgression} onBack={() => setActiveSection('Arènes')} onEditSquad={() => setActiveSection('Équipe')} />}
 
-        {activeSection === 'Codex' && <section className="page-section"><div className="eyebrow">ARCHIVES · MYTHES · LÉGENDES</div><h1>Codex du Cosmos</h1><p className="page-intro">Le codex rassemblera les chevaliers, les armures, les factions, les lieux et les récits découverts durant tes aventures.</p><div className="codex-grid"><article><Shield size={24} /><h2>Armures sacrées</h2><p>Bronze, Argent, Or et armures légendaires.</p></article><article><Star size={24} /><h2>Chevaliers & factions</h2><p>Personnages, affiliations, techniques et liens.</p></article><article><Map size={24} /><h2>Atlas des royaumes</h2><p>Sanctuaire, Asgard, royaume sous-marin et au-delà.</p></article><article><ScrollText size={24} /><h2>Chroniques</h2><p>Arcs narratifs et chronologie des aventures.</p></article></div><p className="rights-note">Les contenus officiels, images, musiques et noms associés à la licence restent soumis aux droits de leurs ayants droit. Ce prototype utilise une interface originale et des éléments textuels provisoires.</p></section>}
+        {activeSection === 'Codex' && <CodexPage progression={progression} campaigns={campaignStates} />}
 
         {notice && <div className="notice" role="status"><Sparkles size={17} /><span>{notice}</span><button onClick={() => setNotice('')} aria-label="Fermer le message"><X size={16} /></button></div>}
         <footer className="footer"><span>SENTO SEIYA <i>·</i> CHRONIQUES DU COSMOS</span><span>UN PROTOTYPE EN CONSTRUCTION</span></footer>

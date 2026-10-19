@@ -131,7 +131,8 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 - [ ] Scènes, décors, arènes et boss.
 - [ ] Campagne originale jouable de bout en bout.
 - [ ] Ajouter les arcs de l'œuvre uniquement après cadrage narratif et droits appropriés.
-- [ ] Codex consultable avec personnages, factions, lieux et chronologie.
+- [x] Codex consultable : chevaliers, adversaires, lieux, objets et chroniques des chapitres, débloqués au fil de la sauvegarde (entrées « ??? » avec indice sinon).
+- [ ] Codex : factions, armures et chronologie détaillée de l'univers.
 - [ ] Import de médias avec validation de formats, tailles et licences.
 
 ## Modes de jeu
