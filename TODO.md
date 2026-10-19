@@ -83,7 +83,8 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 - [x] Tests de cohérence du chapitre, des choix, des conditions, des combats, des récompenses et de la sauvegarde.
 - [x] Chapitre 2 « L'ombre du Phénix » : 9 cases, 3 combats dont un boss, recrutement d'Ikki (combat ou dialogue), 2 trésors (Plume de feu, Cendres du Phénix), textes originaux.
 - [x] Sélection de chapitre : chaque chapitre a sa sauvegarde et se débloque quand le précédent est terminé (statut conservé en rejouant).
-- [ ] Chapitres suivants (Sanctuaire, Asgard, Poséidon, Hadès) après cadrage narratif.
+- [x] Chapitre 3 « Les marches du Sanctuaire » : 10 cases, 3 combats dont le gardien d'or de la Première Maison (combat ou dialogue), chemins dépendant d'Ikki, Shiryu, Shun et des choix faits au village, 2 trésors (Fragment de casque d'argent, Poussière d'or), textes originaux.
+- [ ] Chapitres suivants (les douze maisons, Asgard, Poséidon, Hadès) après cadrage narratif.
 - [ ] Illustrations des scènes et musique d'ambiance par chapitre.
 
 ## Joueur contre Joueur et coop locale — `feature/local-versus`
