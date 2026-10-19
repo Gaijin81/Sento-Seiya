@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { applyEquipment, availableCount, bonusLabel, equipItem, forgeItem, unequipItem } from './equipment'
+import { EQUIPMENT_CATALOG, applyEquipment, availableCount, bonusLabel, equipItem, forgeItem, grantItems, isForgeable, unequipItem } from './equipment'
 import { createKnightUnit, getKnightDefinition } from './knights'
 import { awardVictoryXp, createInitialProgression, parseProgression, SAVE_VERSION, VICTORY_STARDUST, type ProgressionState } from './progression'
 import { createSquadUnits } from './session'
@@ -9,6 +9,17 @@ function ok(result: { ok: boolean; progression: ProgressionState; error?: string
   if (!result.ok) throw new Error(result.error)
   return result.progression
 }
+
+describe('rare items', () => {
+  it('cannot be forged and are only granted', () => {
+    const rich = { ...createInitialProgression(), stardust: 999 }
+    const forged = forgeItem(rich, 'fragment-argent')
+    expect(forged.ok).toBe(false)
+    expect(!forged.ok && forged.error).toContain('se trouve en campagne')
+    expect(EQUIPMENT_CATALOG.filter((item) => !isForgeable(item)).map((item) => item.rarity)).toEqual(['rare', 'rare', 'legendary'])
+    expect(grantItems(rich, ['fragment-argent', 'inconnu']).inventory).toEqual(['fragment-argent'])
+  })
+})
 
 describe('equipment', () => {
   it('starts with no stardust, items or loadouts', () => {

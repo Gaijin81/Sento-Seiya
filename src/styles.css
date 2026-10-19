@@ -197,3 +197,8 @@ button.battle-unit.enemy:disabled{cursor:default}
 .pack-errors{margin:12px 0 0;padding:10px 10px 10px 26px;border:1px solid #ff9b8f55;border-radius:9px;color:#ffb3aa;font-size:11px;line-height:1.6}
 .sound-toggle{margin-right:6px}
 @media(max-width:900px){.options-grid{grid-template-columns:1fr}}
+.treasure-item.rarity-rare{border-color:#7fb4ff55}
+.treasure-item.rarity-rare h3{color:#9cc4ff}
+.treasure-item.rarity-legendary{border-color:#f5c45e88;box-shadow:0 0 22px #f5c45e1f}
+.treasure-item.rarity-legendary h3{color:var(--gold)}
+.treasure-item.undiscovered{opacity:.6}

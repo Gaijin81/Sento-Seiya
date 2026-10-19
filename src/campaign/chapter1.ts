@@ -36,7 +36,7 @@ export const CHAPTER_ONE: Chapter = {
       id: 'coffre', kind: 'treasure', title: 'Le coffre oublié', x: 2, y: 0,
       text: 'Au fond des vestiaires, un coffre de la Fondation contient des éclats d’étoiles : de la poussière d’armure qui vibre encore de Cosmos. Personne ne regarde.',
       choices: [
-        { id: 'prendre', label: 'Prendre les éclats', goTo: 'vol', effects: { shards: 40 }, outcome: '+40 éclats de Cosmos.' },
+        { id: 'prendre', label: 'Prendre les éclats', goTo: 'vol', effects: { shards: 40, items: ['larme-etoile'] }, outcome: '+40 éclats de Cosmos. Au fond du coffre brille une Larme d’étoile filante (talisman rare).' },
         { id: 'laisser', label: 'Les laisser à leur propriétaire', goTo: 'vol', effects: { flags: ['honnete'] }, outcome: 'Ton cœur reste léger. Ton maître aurait été fier de toi.' },
       ],
     },
@@ -76,8 +76,8 @@ export const CHAPTER_ONE: Chapter = {
       id: 'repaire', kind: 'boss', title: 'Le chef des chevaliers noirs', x: 5, y: 1,
       text: '« Le Sagittaire n’appartient à personne », gronde le chef masqué. Des flammes noires dévorent l’air autour de lui. Derrière, un dernier chevalier noir lève sa garde.',
       choices: [
-        { id: 'affronter', label: 'L’affronter', goTo: 'epilogue', combat: 'boss', effects: { flags: ['vainqueur'], stardust: 30 }, outcome: 'Le chef masqué s’effondre et s’enfuit dans l’ombre, laissant l’urne derrière lui. Tu récupères 30 poussières d’étoiles sur son armure brisée.' },
-        { id: 'loyaute', label: 'Lui proposer un duel loyal au tournoi', goTo: 'epilogue', requires: { flag: 'honnete' }, effects: { flags: ['paix'], shards: 30 }, outcome: 'Touché par ta droiture, il dépose l’urne et 30 éclats en signe de respect, puis disparaît.' },
+        { id: 'affronter', label: 'L’affronter', goTo: 'epilogue', combat: 'boss', effects: { flags: ['vainqueur'], stardust: 30, items: ['fragment-argent'] }, outcome: 'Le chef masqué s’effondre et s’enfuit dans l’ombre, laissant l’urne derrière lui. Sur son armure brisée, tu récupères 30 poussières d’étoiles et un Fragment d’armure d’argent (relique rare).' },
+        { id: 'loyaute', label: 'Lui proposer un duel loyal au tournoi', goTo: 'epilogue', requires: { flag: 'honnete' }, effects: { flags: ['paix'], shards: 30, items: ['eclat-or'] }, outcome: 'Touché par ta droiture, il dépose l’urne, 30 éclats et un Éclat d’armure d’or (talisman légendaire) en signe de respect, puis disparaît.' },
       ],
     },
     {

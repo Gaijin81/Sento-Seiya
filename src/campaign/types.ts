@@ -16,6 +16,8 @@ export type Effects = {
   flags?: string[]
   shards?: number
   stardust?: number
+  /** Equipment ids found (rare loot). */
+  items?: string[]
   recruit?: string
 }
 
