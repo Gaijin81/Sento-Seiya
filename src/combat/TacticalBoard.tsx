@@ -30,7 +30,13 @@ export default function TacticalBoard({ combat, canAct, selectedTargetId, headin
   const gridRef = useRef<HTMLDivElement>(null)
   const [focusCell, setFocusCell] = useState<Position>(() => active?.position ?? { x: 0, y: 0 })
   const activeKey = active?.position ? `${active.id}:${active.position.x}-${active.position.y}` : ''
-  useEffect(() => { if (active?.position) setFocusCell(active.position) }, [activeKey]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const position = active?.position
+    if (!position) return
+    setFocusCell(position)
+    const grid = gridRef.current
+    if (grid && grid.contains(document.activeElement)) grid.querySelector<HTMLButtonElement>(`[data-cell="${position.x}-${position.y}"]`)?.focus()
+  }, [activeKey]) // eslint-disable-line react-hooks/exhaustive-deps
   if (!board) return null
   const onGridKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const next = nextGridCell(focusCell, event.key, board.width, board.height)
