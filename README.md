@@ -21,6 +21,8 @@ npm run build
 npm run preview
 ```
 
+Jeu en ligne : lancer le serveur dans un second terminal avec `npm run server` (port 8787), puis Arènes → « Duel en ligne » ou « Coop en ligne ». Détails et déploiement gratuit : [docs/ONLINE.md](./docs/ONLINE.md).
+
 ## Stack
 
 - React 18 + TypeScript strict
@@ -46,7 +48,7 @@ npm run preview
 - [ ] Recrutement et collection de chevaliers
 - [ ] Cartes, décors, scènes et arènes jouables
 - [ ] Comptes, sauvegardes cloud et synchronisation multi-appareils
-- [ ] PvE avec IA, coop et PvP en ligne
+- [x] PvE avec IA, coop et PvP en ligne (serveur : [docs/ONLINE.md](./docs/ONLINE.md))
 - [ ] Éditeur/import de médias avec vérification de formats et licences
 - [ ] Architecture de contenu pour extensions/DLC
 

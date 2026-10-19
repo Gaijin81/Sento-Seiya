@@ -28,7 +28,7 @@ function knight(id: string): UnitSetup {
   return createKnightUnit(definition, VERSUS_LEVEL)
 }
 
-function validatePicks(mode: LocalMode, picks: string[], player: string): string | null {
+export function validatePicks(mode: LocalMode, picks: string[], player: string): string | null {
   if (picks.length === 0) return `${player} doit choisir au moins un chevalier.`
   if (picks.length > MAX_PICKS[mode]) return `${player} ne peut engager que ${MAX_PICKS[mode]} chevalier(s).`
   if (new Set(picks).size !== picks.length) return `${player} a choisi deux fois le même chevalier.`
