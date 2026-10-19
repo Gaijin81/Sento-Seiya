@@ -150,6 +150,12 @@ L'arène de démonstration oppose l'escouade du joueur (1 à 3 chevaliers) à de
 - Les parties locales (PvP / coop) n'utilisent pas l'équipement, pour rester équitables.
 - Sauvegarde v3 : les sauvegardes v1 et v2 sont migrées automatiquement, sans poussières ni objets.
 
+## 6 septies ter. Armures et niveaux de forge
+
+- Chaque chevalier a 3 emplacements : relique, talisman et armure.
+- Armures forgeables : bronze renforcée (60 poussières, PV +6, DÉF +2), argent (120, chapitre 2 terminé, PV +10, ATQ +1, DÉF +3), or (250, chapitre 3 terminé, PV +14, ATQ +3, DÉF +4, Cosmos max +1).
+- Niveaux de forge : un objet possédé s'améliore jusqu'au niveau 3 pour 25, 50 puis 75 poussières. Chaque niveau ajoute +1 à chaque statistique déjà améliorée par l'objet (+2 pour les PV) ; déplacement et portée de technique ne changent pas. Le niveau s'applique à tous les exemplaires de l'objet et est sauvegardé (`upgrades`).
+
 ## 6 quaterdecies. Difficulté
 
 - Réglée dans Options et sauvegardée (`sento-seiya-difficulty`), elle s'applique aux combats contre l'IA (arènes et campagne), pas aux parties locales.

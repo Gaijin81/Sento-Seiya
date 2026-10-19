@@ -8,7 +8,7 @@ import { audio, THEME_LABELS, THEMES, type Theme } from './audio/engine'
 import { loadAudioSettings, saveAudioSettings, type AudioSettings } from './audio/settings'
 import { activatePacks, installPack, loadInstalledPacks, saveInstalledPacks, uninstallPack, type ContentPack } from './dlc/manifest'
 import { EXAMPLE_PACK } from './dlc/examplePack'
-import { applyEquipment, availableCount, bonusLabel, allItems, equipItem, EQUIPMENT_SLOTS, isForgeable, RARITY_LABELS, forgeItem, getItem, ownedCount, SLOT_LABELS, unequipItem } from './combat/equipment'
+import { applyEquipment, availableCount, forgeLevel, MAX_FORGE_LEVEL, requiredChapterLabel, upgradeCost, upgradedBonus, upgradeItem, bonusLabel, allItems, equipItem, EQUIPMENT_SLOTS, isForgeable, RARITY_LABELS, forgeItem, getItem, ownedCount, SLOT_LABELS, unequipItem } from './combat/equipment'
 import CampaignBoard from './campaign/CampaignBoard'
 import CodexPage from './codex/CodexPage'
 import LocalVersus from './versus/LocalVersus'
@@ -217,6 +217,13 @@ export default function App() {
     return () => window.removeEventListener('keydown', closeOnEscape)
   }, [mobileMenu])
 
+  const upgradeButton = (item: ReturnType<typeof allItems>[number]) => {
+    if (ownedCount(progression, item.id) < 1) return null
+    const level = forgeLevel(progression, item.id)
+    if (level >= MAX_FORGE_LEVEL) return <span className="forge-level max">Niveau {level}/{MAX_FORGE_LEVEL} · maximum</span>
+    return <button className="secondary-button" disabled={progression.stardust < upgradeCost(level)} onClick={() => applyResult(upgradeItem(progression, item.id), `${item.name} passe au niveau ${level + 1} !`)} aria-label={`Améliorer ${item.name}, niveau ${level} sur ${MAX_FORGE_LEVEL}, coût ${upgradeCost(level)}`}><Hammer size={14} /> Niv. {level}/{MAX_FORGE_LEVEL} · Améliorer · {upgradeCost(level)}</button>
+  }
+
   const navItems: { label: Section; icon: typeof Map }[] = [
     { label: 'Campagne', icon: Map },
     { label: 'Équipe', icon: Users },
@@ -362,7 +369,7 @@ export default function App() {
             <p className="page-intro">Compose une escouade de {MAX_SQUAD_SIZE} chevaliers maximum et recrute de nouveaux alliés avec les éclats de Cosmos gagnés en combat.</p>
             <div className="progression-summary squad-summary" aria-label="Ressources de l'équipe"><span><Users size={14} /> ESCOUADE <strong>{progression.squad.length}/{MAX_SQUAD_SIZE}</strong></span><span><Sparkles size={14} /> ÉCLATS DE COSMOS <strong>{progression.cosmosShards}</strong></span><span><Hammer size={14} /> POUSSIÈRES D’ÉTOILES <strong>{progression.stardust}</strong></span><span><Trophy size={14} /> VICTOIRES <strong>{progression.victories}</strong></span></div>
             <div className="roster-page-grid">{ownedKnights.map(({ knight, definition }) => {
-              const stats = applyEquipment(createKnightUnit(definition, knight.level), progression.equipment[knight.id])
+              const stats = applyEquipment(createKnightUnit(definition, knight.level), progression.equipment[knight.id], progression.upgrades)
               const inSquad = progression.squad.includes(knight.id)
               return (
                 <article className={`knight-detail ${inSquad ? 'in-squad' : ''}`} key={knight.id}>
@@ -393,15 +400,18 @@ export default function App() {
               )
             })}</div>
             <div className="section-heading recruit-heading"><div><div className="eyebrow">FORGE · POUSSIÈRES D’ÉTOILES</div><h2>Équipement</h2></div><span className="log-count"><Hammer size={13} /> {progression.stardust} poussières</span></div>
-            <p className="page-intro">Chaque victoire rapporte {VICTORY_STARDUST} poussières d’étoiles. Forge des objets puis équipe-les (une relique et un talisman par chevalier) : leurs bonus s’appliquent en combat.</p>
+            <p className="page-intro">Chaque victoire rapporte {VICTORY_STARDUST} poussières d’étoiles. Forge des objets puis équipe-les (une relique, un talisman et une armure par chevalier), puis améliore-les jusqu’au niveau 3 : leurs bonus s’appliquent en combat.</p>
             <div className="forge-grid">{allItems().filter(isForgeable).map((item) => (
               <article className="panel forge-item" key={item.id}>
                 <div className="eyebrow">{SLOT_LABELS[item.slot].toUpperCase()}</div>
                 <h3>{item.name}</h3>
                 <p>{item.description}</p>
-                <strong className="gear-bonus">{bonusLabel(item.bonus)}</strong>
+                <strong className="gear-bonus">{bonusLabel(upgradedBonus(item, forgeLevel(progression, item.id)))}</strong>
                 <div className="detail-stat"><span>Possédés · libres</span><strong>{ownedCount(progression, item.id)} · {availableCount(progression, item.id)}</strong></div>
-                <button className="secondary-button" disabled={progression.stardust < item.cost} onClick={() => applyResult(forgeItem(progression, item.id), `${item.name} forgé !`)}><Hammer size={14} /> Forger · {item.cost}</button>
+                {item.requiresChapter && !clearedChapters.includes(item.requiresChapter)
+                  ? <button className="secondary-button" disabled><Lock size={14} /> Termine le chapitre {requiredChapterLabel(item)}</button>
+                  : <button className="secondary-button" disabled={progression.stardust < item.cost} onClick={() => applyResult(forgeItem(progression, item.id, clearedChapters), `${item.name} forgé !`)}><Hammer size={14} /> Forger · {item.cost}</button>}
+                {upgradeButton(item)}
               </article>
             ))}</div>
             <div className="section-heading recruit-heading"><div><div className="eyebrow">OBJETS RARES · CAMPAGNE</div><h2>Trésors</h2></div><span className="log-count">{allItems().filter((item) => !isForgeable(item) && ownedCount(progression, item.id) > 0).length} / {allItems().filter((item) => !isForgeable(item)).length} trouvés</span></div>
@@ -413,8 +423,9 @@ export default function App() {
                   <div className="eyebrow">{SLOT_LABELS[item.slot].toUpperCase()} · {RARITY_LABELS[item.rarity ?? 'common'].toUpperCase()}</div>
                   <h3>{owned ? item.name : '???'}</h3>
                   <p>{owned ? item.description : 'Pas encore découvert. Explore la campagne et fais d’autres choix.'}</p>
-                  {owned && <strong className="gear-bonus">{bonusLabel(item.bonus)}</strong>}
+                  {owned && <strong className="gear-bonus">{bonusLabel(upgradedBonus(item, forgeLevel(progression, item.id)))}</strong>}
                   {owned && <div className="detail-stat"><span>Possédés · libres</span><strong>{ownedCount(progression, item.id)} · {availableCount(progression, item.id)}</strong></div>}
+                  {owned && upgradeButton(item)}
                 </article>
               )
             })}</div>

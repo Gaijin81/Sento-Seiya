@@ -2,21 +2,27 @@ import { DEFAULT_MOVE } from './board'
 import type { KnightProgress, ProgressionState } from './progression'
 import type { UnitSetup } from './types'
 
-export type EquipmentSlot = 'relic' | 'charm'
+export type EquipmentSlot = 'relic' | 'charm' | 'armor'
 export type Loadout = Partial<Record<EquipmentSlot, string>>
 export type ItemBonus = { hp?: number; attack?: number; defense?: number; speed?: number; maxCosmos?: number; move?: number; techniqueRange?: number }
 export type Rarity = 'common' | 'rare' | 'legendary'
-export type EquipmentItem = { id: string; name: string; slot: EquipmentSlot; description: string; cost: number; bonus: ItemBonus; rarity?: Rarity }
+export type EquipmentItem = { id: string; name: string; slot: EquipmentSlot; description: string; cost: number; bonus: ItemBonus; rarity?: Rarity; /** Chapter that must be cleared before forging. */ requiresChapter?: string }
 export type GearResult = { ok: true; progression: ProgressionState } | { ok: false; error: string; progression: ProgressionState }
 
-export const EQUIPMENT_SLOTS: EquipmentSlot[] = ['relic', 'charm']
-export const SLOT_LABELS: Record<EquipmentSlot, string> = { relic: 'Relique', charm: 'Talisman' }
+export const EQUIPMENT_SLOTS: EquipmentSlot[] = ['relic', 'charm', 'armor']
+export const SLOT_LABELS: Record<EquipmentSlot, string> = { relic: 'Relique', charm: 'Talisman', armor: 'Armure' }
 export const RARITY_LABELS: Record<Rarity, string> = { common: 'Commun', rare: 'Rare', legendary: 'Légendaire' }
 
 /** Rare and legendary items cannot be forged: they are only found in the campaign. */
 export const isForgeable = (item: EquipmentItem) => (item.rarity ?? 'common') === 'common'
 
+export const MAX_FORGE_LEVEL = 3
+export const upgradeCost = (level: number) => 25 * (level + 1)
+
 export const EQUIPMENT_CATALOG: EquipmentItem[] = [
+  { id: 'armure-bronze-renforcee', name: 'Armure de bronze renforcée', slot: 'armor', cost: 60, description: 'Les plaques de bronze sont doublées d’un alliage d’étoiles.', bonus: { hp: 6, defense: 2 } },
+  { id: 'armure-argent', name: 'Armure d’argent', slot: 'armor', cost: 120, requiresChapter: 'ile-du-phenix', description: 'Une armure complète d’argent, reforgée à partir des armures brisées des chevaliers noirs.', bonus: { hp: 10, attack: 1, defense: 3 } },
+  { id: 'armure-or', name: 'Armure d’or', slot: 'armor', cost: 250, requiresChapter: 'marches-du-sanctuaire', description: 'Forgée avec la poussière d’or des douze maisons. Elle brille comme le soleil.', bonus: { hp: 14, attack: 3, defense: 4, maxCosmos: 1 } },
   { id: 'bracelet-bronze', name: 'Bracelet de bronze', slot: 'relic', cost: 20, description: 'Forgé dans les restes d’une armure brisée.', bonus: { attack: 2 } },
   { id: 'cape-sanctuaire', name: 'Cape du Sanctuaire', slot: 'relic', cost: 20, description: 'Tissée par les servantes du Sanctuaire.', bonus: { defense: 2 } },
   { id: 'lentille-stellaire', name: 'Lentille stellaire', slot: 'relic', cost: 40, description: 'Concentre le Cosmos vers les cibles lointaines.', bonus: { techniqueRange: 1 } },
@@ -66,12 +72,43 @@ export function availableCount(progression: ProgressionState, itemId: string): n
 }
 
 /** Spends stardust to add one copy of an item to the inventory. */
-export function forgeItem(progression: ProgressionState, itemId: string): GearResult {
+export function forgeItem(progression: ProgressionState, itemId: string, clearedChapters: string[] = []): GearResult {
   const item = getItem(itemId)
   if (!item) return { ok: false, error: 'Objet inconnu.', progression }
   if (!isForgeable(item)) return { ok: false, error: `${item.name} ne se forge pas : il se trouve en campagne.`, progression }
+  if (item.requiresChapter && !clearedChapters.includes(item.requiresChapter)) return { ok: false, error: `${item.name} se débloque en terminant le chapitre ${requiredChapterLabel(item)}.`, progression }
   if (progression.stardust < item.cost) return { ok: false, error: `Il faut ${item.cost} poussières d’étoiles pour forger ${item.name}.`, progression }
   return { ok: true, progression: { ...progression, stardust: progression.stardust - item.cost, inventory: [...progression.inventory, item.id] } }
+}
+
+const CHAPTER_NUMBERS: Record<string, number> = { 'tournoi-galactique': 1, 'ile-du-phenix': 2, 'marches-du-sanctuaire': 3 }
+export const requiredChapterLabel = (item: EquipmentItem) => String(item.requiresChapter ? CHAPTER_NUMBERS[item.requiresChapter] ?? item.requiresChapter : '')
+
+export const forgeLevel = (progression: Pick<ProgressionState, 'upgrades'>, itemId: string) => progression.upgrades?.[itemId] ?? 0
+
+/** Each forge level adds +1 to every stat the item already boosts (+2 for PV); movement and range stay fixed. */
+export function upgradedBonus(item: EquipmentItem, level: number): ItemBonus {
+  if (level <= 0) return item.bonus
+  const bonus: ItemBonus = { ...item.bonus }
+  for (const key of ['hp', 'attack', 'defense', 'speed'] as const) if (bonus[key]) bonus[key] = bonus[key]! + (key === 'hp' ? 2 : 1) * level
+  return bonus
+}
+
+/** Upgrades every owned copy of an item (levels are tracked per item type). */
+export function upgradeItem(progression: ProgressionState, itemId: string): GearResult {
+  const item = getItem(itemId)
+  if (!item) return { ok: false, error: 'Objet inconnu.', progression }
+  if (ownedCount(progression, itemId) < 1) return { ok: false, error: `Tu ne possèdes pas ${item.name}.`, progression }
+  const level = forgeLevel(progression, itemId)
+  if (level >= MAX_FORGE_LEVEL) return { ok: false, error: `${item.name} est déjà au niveau maximum.`, progression }
+  const cost = upgradeCost(level)
+  if (progression.stardust < cost) return { ok: false, error: `Il faut ${cost} poussières d’étoiles pour améliorer ${item.name}.`, progression }
+  return { ok: true, progression: { ...progression, stardust: progression.stardust - cost, upgrades: { ...progression.upgrades, [itemId]: level + 1 } } }
+}
+
+export function normalizeUpgrades(raw: unknown, inventory: string[]): Record<string, number> {
+  if (!raw || typeof raw !== 'object') return {}
+  return Object.fromEntries(Object.entries(raw as Record<string, unknown>).filter(([id, level]) => inventory.includes(id) && Number.isInteger(level) && (level as number) >= 1 && (level as number) <= MAX_FORGE_LEVEL)) as Record<string, number>
 }
 
 /** Equips a free copy in the item's slot, replacing (and freeing) whatever was there. */
@@ -92,10 +129,10 @@ export function unequipItem(progression: ProgressionState, knightId: string, slo
   return { ok: true, progression: { ...progression, equipment: { ...progression.equipment, [knightId]: rest } } }
 }
 
-export function applyEquipment(unit: UnitSetup, loadout: Loadout | undefined): UnitSetup {
+export function applyEquipment(unit: UnitSetup, loadout: Loadout | undefined, upgrades: Record<string, number> = {}): UnitSetup {
   const items = EQUIPMENT_SLOTS.flatMap((slot) => {
     const item = loadout?.[slot] ? getItem(loadout[slot]!) : undefined
-    return item ? [item.bonus] : []
+    return item ? [upgradedBonus(item, upgrades[item.id] ?? 0)] : []
   })
   if (items.length === 0) return unit
   const sum = (key: keyof ItemBonus) => items.reduce((total, bonus) => total + (bonus[key] ?? 0), 0)

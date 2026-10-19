@@ -35,7 +35,7 @@ export function createSquadUnits(progression: ProgressionState): UnitSetup[] {
   return progression.squad.flatMap((id) => {
     const definition = getKnightDefinition(id)
     const knight = progression.knights.find((entry) => entry.id === id)
-    return definition && knight ? [applyEquipment(createKnightUnit(definition, knight.level), progression.equipment[id])] : []
+    return definition && knight ? [applyEquipment(createKnightUnit(definition, knight.level), progression.equipment[id], progression.upgrades)] : []
   }).slice(0, PLAYER_SPAWNS.length).map((unit, index) => ({ ...unit, position: { ...PLAYER_SPAWNS[index] } }))
 }
 

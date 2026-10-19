@@ -105,7 +105,8 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 - [x] Sauvegarde v3 avec migration automatique des sauvegardes v1/v2 ; équipements invalides ignorés.
 - [x] Tests de la forge, de l'inventaire, des bonus, du combat et de la migration de sauvegarde.
 - [x] Objets trouvés en campagne : 3 objets rares/légendaires (fragment d'armure d'argent, éclat d'armure d'or, larme d'étoile filante) non forgeables, obtenus selon les choix du chapitre 1 ; section « Trésors » à la page Équipe.
-- [ ] Armures complètes d'argent et d'or (sets d'objets) avec les chapitres suivants.
+- [x] Emplacement « Armure » : armure de bronze renforcée (60), armure d'argent (120, après le chapitre 2), armure d'or (250, après le chapitre 3).
+- [ ] Bonus de set quand armure, relique et talisman d'une même famille sont équipés ensemble.
 
 ## Musique et contenus additionnels (DLC) — `feature/audio-dlc`
 
@@ -121,7 +122,7 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 - [x] XP, niveaux, progression persistante et récompenses.
 - [ ] Collection étendue (88 chevaliers), formation et positionnement d'équipe.
 - [x] Inventaire, équipement et ressources.
-- [ ] Améliorations d'objets (niveaux de forge).
+- [x] Niveaux de forge : chaque objet possédé s'améliore jusqu'au niveau 3 (25, 50, 75 poussières) ; +1 à chaque stat déjà améliorée (+2 PV), déplacement et portée inchangés.
 - [x] Sauvegarde locale versionnée et migration des données (v1 → v2).
 - [ ] Comptes et sauvegarde cloud multi-appareils.
 
