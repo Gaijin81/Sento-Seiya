@@ -1,9 +1,13 @@
-import { useState } from 'react'
-import { VICTORY_STARDUST, createInitialProgression, loadProgression, MAX_SQUAD_SIZE, saveProgression, xpRequiredForNextLevel, type ProgressionState } from './combat/progression'
+import { useEffect, useState } from 'react'
+import { parseProgression, VICTORY_STARDUST, createInitialProgression, loadProgression, MAX_SQUAD_SIZE, saveProgression, xpRequiredForNextLevel, type ProgressionState } from './combat/progression'
 import { createKnightUnit, getKnightDefinition, knightStatsAtLevel, type KnightDefinition } from './combat/knights'
 import { getRecruitableKnights, getRecruitStatus, recruitKnight, toggleSquadMember, type ProgressionResult } from './combat/recruitment'
 import CombatArena from './combat/CombatArena'
-import { applyEquipment, availableCount, bonusLabel, equipItem, EQUIPMENT_CATALOG, EQUIPMENT_SLOTS, forgeItem, getItem, ownedCount, SLOT_LABELS, unequipItem } from './combat/equipment'
+import { audio, THEME_LABELS, THEMES, type Theme } from './audio/engine'
+import { loadAudioSettings, saveAudioSettings, type AudioSettings } from './audio/settings'
+import { activatePacks, installPack, loadInstalledPacks, saveInstalledPacks, uninstallPack, type ContentPack } from './dlc/manifest'
+import { EXAMPLE_PACK } from './dlc/examplePack'
+import { applyEquipment, availableCount, bonusLabel, allItems, equipItem, EQUIPMENT_SLOTS, forgeItem, getItem, ownedCount, SLOT_LABELS, unequipItem } from './combat/equipment'
 import CampaignBoard from './campaign/CampaignBoard'
 import LocalVersus from './versus/LocalVersus'
 import type { LocalMode } from './versus/match'
@@ -15,6 +19,12 @@ import {
   Swords, Shield, Sparkles, Users, Map, ScrollText, Trophy,
   ChevronRight, Flame, Star, CircleHelp, Menu, X, Heart, Zap,
   Hammer,
+  Package,
+  Settings,
+  Trash2,
+  Upload,
+  Volume2,
+  VolumeX,
 } from 'lucide-react'
 
 type Campaign = {
@@ -64,7 +74,14 @@ const recruitLabels = {
   owned: 'Recruté',
 } as const
 
-type Section = 'Campagne' | 'Équipe' | 'Arènes' | 'Combat' | 'Codex' | 'Partie locale'
+type Section = 'Campagne' | 'Équipe' | 'Arènes' | 'Combat' | 'Codex' | 'Partie locale' | 'Options'
+
+const BOOT_PACKS: ContentPack[] = (() => {
+  if (typeof window === 'undefined') return []
+  const packs = loadInstalledPacks(window.localStorage)
+  audio.setOverrides(activatePacks(packs))
+  return packs
+})()
 
 export default function App() {
   const [activeSection, setActiveSection] = useState<Section>('Campagne')
@@ -94,6 +111,42 @@ export default function App() {
   const [campaignOutcome, setCampaignOutcome] = useState('')
   const [campaignFight, setCampaignFight] = useState<string | null>(null)
   const [localMode, setLocalMode] = useState<LocalMode>('pvp')
+  const [audioSettings, setAudioSettings] = useState<AudioSettings>(() => (typeof window === 'undefined' ? loadAudioSettings({ getItem: () => null, setItem: () => undefined }) : loadAudioSettings(window.localStorage)))
+  const [packs, setPacks] = useState<ContentPack[]>(() => BOOT_PACKS)
+  const [packErrors, setPackErrors] = useState<string[]>([])
+
+  const theme: Theme = activeSection === 'Combat' || activeSection === 'Partie locale' || (activeSection === 'Campagne' && campaignFight) ? 'battle' : activeSection === 'Campagne' ? 'campaign' : 'menu'
+  useEffect(() => { audio.playTheme(theme) }, [theme])
+  useEffect(() => {
+    audio.configure(audioSettings)
+    try { saveAudioSettings(window.localStorage, audioSettings) } catch { /* settings stay in memory */ }
+  }, [audioSettings])
+  useEffect(() => {
+    const unlock = () => audio.unlock()
+    window.addEventListener('pointerdown', unlock)
+    window.addEventListener('keydown', unlock)
+    return () => { window.removeEventListener('pointerdown', unlock); window.removeEventListener('keydown', unlock) }
+  }, [])
+
+  const updatePacks = (next: ContentPack[], message: string) => {
+    setPacks(next)
+    audio.setOverrides(activatePacks(next))
+    try { saveInstalledPacks(window.localStorage, next) } catch { /* packs stay in memory */ }
+    const cleaned = parseProgression(progression)
+    if (cleaned) commitProgression(cleaned)
+    setPackErrors([])
+    setNotice(message)
+  }
+  const installRawPack = (raw: unknown) => {
+    const result = installPack(packs, raw)
+    if (!result.ok) { setPackErrors(result.errors); setNotice('Pack refusé : voir les erreurs dans Options.'); return }
+    updatePacks(result.packs, `Pack « ${result.pack.name} » installé.`)
+  }
+  const importPackFile = async (file: File | undefined) => {
+    if (!file) return
+    if (file.size > 50_000) { setPackErrors(['Fichier trop volumineux (50 Ko maximum).']); return }
+    try { installRawPack(JSON.parse(await file.text())) } catch { setPackErrors(['Le fichier n’est pas un JSON valide.']) }
+  }
   const openLocal = (mode: LocalMode) => { setLocalMode(mode); setActiveSection('Partie locale') }
 
   const commitCampaign = (next: CampaignState) => {
@@ -139,6 +192,7 @@ export default function App() {
     { label: 'Arènes', icon: Swords },
     { label: 'Combat', icon: Flame },
     { label: 'Codex', icon: ScrollText },
+    { label: 'Options', icon: Settings },
   ]
 
   return (
@@ -183,7 +237,7 @@ export default function App() {
         <header className="topbar">
           <button className="icon-button mobile-menu-button" onClick={() => setMobileMenu(true)} aria-label="Ouvrir le menu"><Menu size={21} /></button>
           <div className="breadcrumb"><span>SANCTUAIRE</span><ChevronRight size={14} /><strong>{activeSection.toUpperCase()}</strong></div>
-          <div className="topbar-actions"><div className="resource" aria-label="Éclats de Cosmos"><Sparkles size={16} /><strong>{progression.cosmosShards}</strong><span>Éclats</span></div><div className="top-avatar">?</div></div>
+          <div className="topbar-actions"><button className="icon-button sound-toggle" onClick={() => setAudioSettings({ ...audioSettings, muted: !audioSettings.muted })} aria-label={audioSettings.muted ? 'Activer le son' : 'Couper le son'} aria-pressed={audioSettings.muted}>{audioSettings.muted ? <VolumeX size={18} /> : <Volume2 size={18} />}</button><div className="resource" aria-label="Éclats de Cosmos"><Sparkles size={16} /><strong>{progression.cosmosShards}</strong><span>Éclats</span></div><div className="top-avatar">?</div></div>
         </header>
 
         {activeSection === 'Campagne' && campaignFight && ENCOUNTERS[campaignFight] && (
@@ -223,7 +277,7 @@ export default function App() {
               state={campaign}
               progression={progression}
               outcome={campaignOutcome}
-              onChoose={(choiceId) => applyCampaign(chooseOption(CHAPTER_ONE, campaign, progression, choiceId))}
+              onChoose={(choiceId) => { audio.sfx('select'); applyCampaign(chooseOption(CHAPTER_ONE, campaign, progression, choiceId)) }}
               onResumeCombat={() => setCampaignFight(pendingEncounter(CHAPTER_ONE, campaign) ?? null)}
               onRetreat={() => applyCampaign(resolveEncounter(CHAPTER_ONE, campaign, progression, false))}
               onRestart={() => { commitCampaign(createCampaign(CHAPTER_ONE, campaign.rewarded)); setCampaignOutcome('') }}
@@ -281,7 +335,7 @@ export default function App() {
                   <div className="detail-stat"><span>{definition.technique.name}</span><strong>{definition.technique.cost} Cosmos</strong></div>
                   <div className="gear-slots">{EQUIPMENT_SLOTS.map((slot) => {
                     const equipped = progression.equipment[knight.id]?.[slot]
-                    const options = EQUIPMENT_CATALOG.filter((item) => item.slot === slot && (item.id === equipped || availableCount(progression, item.id) > 0))
+                    const options = allItems().filter((item) => item.slot === slot && (item.id === equipped || availableCount(progression, item.id) > 0))
                     return (
                       <label className="gear-slot" key={slot}>
                         <span>{SLOT_LABELS[slot]}</span>
@@ -298,7 +352,7 @@ export default function App() {
             })}</div>
             <div className="section-heading recruit-heading"><div><div className="eyebrow">FORGE · POUSSIÈRES D’ÉTOILES</div><h2>Équipement</h2></div><span className="log-count"><Hammer size={13} /> {progression.stardust} poussières</span></div>
             <p className="page-intro">Chaque victoire rapporte {VICTORY_STARDUST} poussières d’étoiles. Forge des objets puis équipe-les (une relique et un talisman par chevalier) : leurs bonus s’appliquent en combat.</p>
-            <div className="forge-grid">{EQUIPMENT_CATALOG.map((item) => (
+            <div className="forge-grid">{allItems().map((item) => (
               <article className="panel forge-item" key={item.id}>
                 <div className="eyebrow">{SLOT_LABELS[item.slot].toUpperCase()}</div>
                 <h3>{item.name}</h3>
@@ -330,6 +384,35 @@ export default function App() {
         {activeSection === 'Arènes' && <section className="page-section"><div className="eyebrow">COMBAT · HONNEUR · STRATÉGIE</div><h1>Les arènes</h1><p className="page-intro">Prépare-toi aux combats tactiques, aux défis contre l’IA et aux affrontements entre joueurs.</p><div className="arena-grid"><article className="arena-card"><div className="arena-icon"><Swords size={28} /></div><span className="campaign-subtitle">SOLO · PVE</span><h2>Épreuve du Sanctuaire</h2><p>Affronte une série d’adversaires contrôlés par l’IA et teste ta stratégie.</p><button className="secondary-button arena-launch" onClick={() => setActiveSection('Combat')}><Swords size={15} /> Lancer un combat <ChevronRight size={15} /></button></article><article className="arena-card"><div className="arena-icon violet-icon"><Shield size={28} /></div><span className="campaign-subtitle">DUEL · PVP</span><h2>Défi des chevaliers</h2><p>Compare tes équipes et mesure ta maîtrise du Cosmos contre d’autres joueurs.</p><button className="secondary-button arena-launch" onClick={() => openLocal('pvp')}><Swords size={15} /> Duel sur le même appareil <ChevronRight size={15} /></button></article><article className="arena-card"><div className="arena-icon jade-icon"><Users size={28} /></div><span className="campaign-subtitle">COOPÉRATION</span><h2>Alliance des héros</h2><p>Unis tes forces avec d’autres joueurs pour vaincre des boss redoutables.</p><button className="secondary-button arena-launch" onClick={() => openLocal('coop')}><Users size={15} /> Coop sur le même appareil <ChevronRight size={15} /></button></article></div></section>}
 
         {activeSection === 'Partie locale' && <LocalVersus key={localMode} initialMode={localMode} onBack={() => setActiveSection('Arènes')} />}
+        {activeSection === 'Options' && (
+          <section className="page-section">
+            <div className="eyebrow">SON · CONTENUS ADDITIONNELS</div>
+            <h1>Options</h1>
+            <div className="options-grid">
+              <article className="panel">
+                <div className="panel-heading"><div><div className="eyebrow">AUDIO</div><h2>Musique et effets</h2></div><button className="secondary-button" aria-pressed={audioSettings.muted} onClick={() => setAudioSettings({ ...audioSettings, muted: !audioSettings.muted })}>{audioSettings.muted ? <VolumeX size={15} /> : <Volume2 size={15} />} {audioSettings.muted ? 'Son coupé' : 'Son activé'}</button></div>
+                <label className="volume-row"><span>Musique</span><input type="range" min={0} max={100} step={5} value={audioSettings.music} onChange={(event) => setAudioSettings({ ...audioSettings, music: Number(event.target.value) })} aria-label="Volume de la musique" /><strong>{audioSettings.music} %</strong></label>
+                <label className="volume-row"><span>Effets</span><input type="range" min={0} max={100} step={5} value={audioSettings.sfx} onChange={(event) => setAudioSettings({ ...audioSettings, sfx: Number(event.target.value) })} aria-label="Volume des effets" /><strong>{audioSettings.sfx} %</strong></label>
+                <button className="text-button" onClick={() => { audio.unlock(); audio.sfx('technique') }}>Tester un effet sonore <ChevronRight size={15} /></button>
+                <p className="control-hint">Musiques originales générées par le navigateur, une par ambiance ({THEMES.map((entry) => THEME_LABELS[entry]).join(', ')}). Un pack peut les remplacer par ses propres fichiers. Sur mobile, le son démarre après le premier toucher.</p>
+              </article>
+              <article className="panel">
+                <div className="panel-heading"><div><div className="eyebrow">DLC</div><h2>Packs de contenu</h2></div><span className="log-count">{packs.length} installé(s)</span></div>
+                {packs.length === 0 ? <p className="control-hint">Aucun pack installé.</p> : (
+                  <ul className="pack-list">{packs.map((pack) => (
+                    <li key={pack.id}><Package size={18} /><span><strong>{pack.name}</strong><small>v{pack.version}{pack.author ? ` · ${pack.author}` : ''} · {pack.items.length} objet(s){Object.keys(pack.music).length ? ` · musiques : ${Object.keys(pack.music).map((entry) => THEME_LABELS[entry as Theme]).join(', ')}` : ''}</small>{pack.description && <small>{pack.description}</small>}</span><button className="icon-button" onClick={() => updatePacks(uninstallPack(packs, pack.id), `Pack « ${pack.name} » désinstallé. Ses objets ont été retirés.`)} aria-label={`Désinstaller ${pack.name}`}><Trash2 size={16} /></button></li>
+                  ))}</ul>
+                )}
+                <div className="prep-buttons">
+                  <button className="secondary-button" onClick={() => installRawPack(EXAMPLE_PACK)}><Package size={15} /> Installer le pack d’exemple</button>
+                  <label className="secondary-button file-button"><Upload size={15} /> Importer un pack (.json)<input type="file" accept="application/json,.json" onChange={(event) => { void importPackFile(event.target.files?.[0]); event.target.value = '' }} /></label>
+                </div>
+                {packErrors.length > 0 && <ul className="pack-errors" role="alert">{packErrors.map((error) => <li key={error}>{error}</li>)}</ul>}
+                <p className="control-hint">Un pack est un fichier JSON validé (format décrit dans les règles du jeu) : objets de forge et musiques. Aucun code n’est exécuté.</p>
+              </article>
+            </div>
+          </section>
+        )}
         {activeSection === 'Combat' && <CombatArena progression={progression} onProgressionChanged={commitProgression} onBack={() => setActiveSection('Arènes')} onEditSquad={() => setActiveSection('Équipe')} />}
 
         {activeSection === 'Codex' && <section className="page-section"><div className="eyebrow">ARCHIVES · MYTHES · LÉGENDES</div><h1>Codex du Cosmos</h1><p className="page-intro">Le codex rassemblera les chevaliers, les armures, les factions, les lieux et les récits découverts durant tes aventures.</p><div className="codex-grid"><article><Shield size={24} /><h2>Armures sacrées</h2><p>Bronze, Argent, Or et armures légendaires.</p></article><article><Star size={24} /><h2>Chevaliers & factions</h2><p>Personnages, affiliations, techniques et liens.</p></article><article><Map size={24} /><h2>Atlas des royaumes</h2><p>Sanctuaire, Asgard, royaume sous-marin et au-delà.</p></article><article><ScrollText size={24} /><h2>Chroniques</h2><p>Arcs narratifs et chronologie des aventures.</p></article></div><p className="rights-note">Les contenus officiels, images, musiques et noms associés à la licence restent soumis aux droits de leurs ayants droit. Ce prototype utilise une interface originale et des éléments textuels provisoires.</p></section>}

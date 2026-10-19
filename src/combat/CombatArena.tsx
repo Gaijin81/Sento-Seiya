@@ -6,6 +6,7 @@ import { getKnightDefinition } from './knights'
 import { createEncounterCombat, createSquadUnits, DEMO_ENEMIES, playActionAndResolveAi } from './session'
 import type { Encounter } from '../campaign/types'
 import TacticalBoard, { unitGlyph } from './TacticalBoard'
+import { audio } from '../audio/engine'
 import type { CombatAction, CombatState, CombatUnit, Position } from './types'
 import { awardVictoryXp, VICTORY_SHARDS, VICTORY_STARDUST, VICTORY_XP, type ProgressionState } from './progression'
 
@@ -63,6 +64,7 @@ export default function CombatArena({ progression, onProgressionChanged, onBack,
       return
     }
     setCombat(result.state)
+    audio.sfx(result.state.status === 'victory' ? 'victory' : result.state.status === 'defeat' ? 'defeat' : action.type === 'technique' ? 'technique' : action.type === 'attack' ? 'hit' : 'select')
     if (result.state.status === 'victory') {
       const participants = result.state.units.filter((unit) => unit.team === 'player').map((unit) => unit.id)
       const rewarded = awardVictoryXp(progression, combatId, result.state, participants)
