@@ -27,6 +27,11 @@ yarn preview
 - lucide-react pour les icônes
 - CSS responsive sans dépendance de composants lourde
 
+## Documents de référence
+
+- [TODO centrale](./TODO.md) : avancement, prochaines étapes et règles de branches.
+- [Règles du jeu](./docs/GAME_RULES.md) : boucle de jeu, combat, statistiques et critères de validation.
+
 ## État des fonctionnalités
 
 - [x] Interface responsive et navigation
