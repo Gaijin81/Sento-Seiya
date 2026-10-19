@@ -11,10 +11,14 @@ export type Technique = {
 
 export type Position = { x: number; y: number }
 
+export type TerrainKind = 'cover' | 'height' | 'cosmos'
+
 export type Board = {
   width: number
   height: number
   obstacles: Position[]
+  /** Special cells: cover (−2 damage taken), height (+1 range), cosmos spring (+1 Cosmos when stopping there). */
+  terrain?: (Position & { kind: TerrainKind })[]
 }
 
 export type CombatUnit = {

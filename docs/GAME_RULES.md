@@ -136,6 +136,13 @@ L'arène de démonstration oppose l'escouade du joueur (1 à 3 chevaliers) à de
 - Les parties locales (PvP / coop) n'utilisent pas l'équipement, pour rester équitables.
 - Sauvegarde v3 : les sauvegardes v1 et v2 sont migrées automatiquement, sans poussières ni objets.
 
+## 6 terdecies. Terrain du plateau
+
+- Couverture (bouclier) : un chevalier qui s'y trouve subit 2 dégâts de moins par coup (minimum 1, avant la réduction de garde).
+- Hauteur (montagne) : +1 portée pour l'attaque et la technique tant que le chevalier y reste.
+- Source de Cosmos (étincelles) : +1 Cosmos (sans dépasser le maximum) quand un chevalier termine son déplacement dessus.
+- L'arène place ces cases de façon symétrique (couvertures et hauteur en haut, sources et hauteur en bas) : le terrain s'applique aux arènes, à la campagne et aux parties locales, pour les deux camps.
+
 ## 6 septies bis. Objets rares trouvés en campagne
 
 - Rareté : commun (forgeable), rare ou légendaire. Les objets rares et légendaires ne se forgent pas : ils sont donnés par certains choix de campagne (effet `items`), une seule fois même en rejouant.

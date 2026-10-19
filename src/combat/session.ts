@@ -13,7 +13,15 @@ const demoUnits: UnitSetup[] = [
 ]
 
 /** Sanctuary arena: 7×5 cells with two broken pillars in the middle. */
-export const ARENA_BOARD: Board = { width: 7, height: 5, obstacles: [{ x: 3, y: 1 }, { x: 3, y: 3 }] }
+export const ARENA_BOARD: Board = {
+  width: 7,
+  height: 5,
+  obstacles: [{ x: 3, y: 1 }, { x: 3, y: 3 }],
+  terrain: [
+    { x: 2, y: 0, kind: 'cover' }, { x: 3, y: 0, kind: 'height' }, { x: 4, y: 0, kind: 'cover' },
+    { x: 2, y: 4, kind: 'cosmos' }, { x: 3, y: 4, kind: 'height' }, { x: 4, y: 4, kind: 'cosmos' },
+  ],
+}
 export const PLAYER_SPAWNS: Position[] = [{ x: 0, y: 2 }, { x: 0, y: 1 }, { x: 0, y: 3 }]
 
 export const DEMO_ENEMIES: UnitSetup[] = demoUnits.filter((unit) => unit.team === 'enemy')

@@ -1,4 +1,4 @@
-import { attackRange, distance, isInside, isObstacle, isWithinRange, reachableCells, samePosition, techniqueRange } from './board'
+import { attackRange, COVER_REDUCTION, distance, isInside, isObstacle, isWithinRange, reachableCells, samePosition, techniqueRange, terrainAt } from './board'
 import type {
   ActionResult,
   Board,
@@ -44,6 +44,10 @@ function assertValidBoard(board: Board, setups: UnitSetup[]): void {
   for (const obstacle of board.obstacles) {
     if (!isInside(board, obstacle)) throw new Error('Obstacle outside the board.')
   }
+  for (const [index, cell] of (board.terrain ?? []).entries()) {
+    if (!isInside(board, cell) || isObstacle(board, cell)) throw new Error('Terrain must be on a free cell of the board.')
+    if (board.terrain!.findIndex((other) => samePosition(other, cell)) !== index) throw new Error('Two terrain cells share a position.')
+  }
   const occupied: { x: number; y: number }[] = []
   for (const unit of setups) {
     const position = unit.position
@@ -81,7 +85,7 @@ export function createCombat(setups: UnitSetup[], board?: Board): CombatState {
     .sort((a, b) => b.speed - a.speed || setups.findIndex((unit) => unit.id === a.id) - setups.findIndex((unit) => unit.id === b.id))
     .map((unit) => unit.id)
 
-  const combatBoard = board ? { ...board, obstacles: board.obstacles.map((cell) => ({ ...cell })) } : undefined
+  const combatBoard = board ? { ...board, obstacles: board.obstacles.map((cell) => ({ ...cell })), terrain: board.terrain?.map((cell) => ({ ...cell })) } : undefined
   return { units, turnOrder, activeIndex: 0, round: 1, status: 'ongoing', winner: null, log: [], board: combatBoard, moved: false }
 }
 
@@ -127,11 +131,12 @@ function updateUnit(state: CombatState, updated: CombatUnit): CombatState {
 }
 
 function damageTarget(state: CombatState, actor: CombatUnit, target: CombatUnit, power: number, action: CombatAction): CombatState {
-  const rawDamage = Math.max(1, power - target.defense)
+  const covered = terrainAt(state.board, target.position) === 'cover'
+  const rawDamage = Math.max(1, power - target.defense - (covered ? COVER_REDUCTION : 0))
   const damage = target.guarding ? Math.max(1, Math.ceil(rawDamage / 2)) : rawDamage
   const updatedTarget = { ...target, hp: Math.max(0, target.hp - damage), guarding: false }
   const next = updateUnit(state, updatedTarget)
-  return appendLog(next, actor, action, `${actor.name} inflige ${damage} dégâts à ${target.name}.`)
+  return appendLog(next, actor, action, `${actor.name} inflige ${damage} dégâts à ${target.name}${covered ? ' (à couvert)' : ''}.`)
 }
 
 /** Apply one legal action for the current unit. Invalid actions return the original state unchanged. */
@@ -147,8 +152,9 @@ export function performAction(state: CombatState, actorId: string, action: Comba
     if (!reachableCells(state, actor.id).some((cell) => samePosition(cell, action.to))) {
       return { ok: false, error: 'Case hors de portée de déplacement.', state }
     }
-    next = updateUnit(state, { ...actor, position: { ...action.to } })
-    next = appendLog({ ...next, moved: true }, actor, action, `${actor.name} se déplace en ${action.to.x + 1}-${action.to.y + 1}.`)
+    const spring = terrainAt(state.board, action.to) === 'cosmos' && actor.cosmos < actor.maxCosmos
+    next = updateUnit(state, { ...actor, position: { ...action.to }, cosmos: spring ? actor.cosmos + 1 : actor.cosmos })
+    next = appendLog({ ...next, moved: true }, actor, action, `${actor.name} se déplace en ${action.to.x + 1}-${action.to.y + 1}${spring ? ' et puise dans la source de Cosmos (+1)' : ''}.`)
     return { ok: true, state: next }
   } else if (action.type === 'wait') {
     next = appendLog(state, actor, action, `${actor.name} termine son tour.`)
