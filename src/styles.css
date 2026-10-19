@@ -105,3 +105,27 @@ button.battle-unit.enemy:disabled{cursor:default}
 .prep-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
 .prep-buttons{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .prep-buttons .secondary-button,.prep-buttons .primary-button{margin-top:0}
+.tactical-panel{margin-bottom:16px}
+.tactical-panel .control-hint{display:inline-flex;align-items:center;gap:5px}
+.tactical-board{display:grid;gap:5px;max-width:640px;margin:0 auto;padding:8px;border:1px solid #d8b66b26;border-radius:12px;background:radial-gradient(ellipse at 50% 50%,#b7a1ff12,transparent 70%),#0d1220;touch-action:manipulation}
+.board-cell{position:relative;aspect-ratio:1;min-width:0;display:grid;place-items:center;padding:0;border:1px solid var(--line);border-radius:7px;background:#171d2b;color:#e8eaf3}
+.board-cell:disabled{cursor:default;opacity:1}
+.board-cell.cell-obstacle{background:repeating-linear-gradient(45deg,#232a3b,#232a3b 5px,#1a2030 5px,#1a2030 10px);border-color:#ffffff14}
+.pillar{color:#7f89a3;font-size:clamp(12px,3vw,20px)}
+.board-cell.cell-reachable{background:#e5bd7214;border-color:#e5bd7266;box-shadow:inset 0 0 12px #e5bd7222}
+.board-cell.cell-reachable:hover{background:#e5bd7230}
+.board-cell.cell-reachable:after{content:"";width:22%;height:22%;border-radius:50%;background:#e5bd7299}
+.board-cell.cell-ally{border-color:#92c8ff40}
+.board-cell.cell-enemy{border-color:#ff9b8f40}
+.board-cell.cell-in-range{border-color:#ff9b8fcc;box-shadow:inset 0 0 14px #ff9b8f33}
+.board-cell.cell-active{border-color:var(--gold);box-shadow:0 0 0 2px #e5bd7266,inset 0 0 14px #e5bd7233}
+.board-cell.cell-target{outline:2px dashed var(--coral);outline-offset:-5px}
+.board-token{position:relative;width:78%;height:78%;display:grid;place-items:center;border-radius:50%;font-size:clamp(14px,3.6vw,24px);color:var(--gold);background:#e5bd7214;border:1px solid #e5bd7240;overflow:hidden}
+.board-token.violet{color:var(--violet);background:#b7a1ff14;border-color:#b7a1ff40}
+.board-token.coral,.board-token.enemy-avatar{color:var(--coral);background:#ff9b8f14;border-color:#ff9b8f40}
+.board-token.jade{color:var(--jade);background:#8bd9bd14;border-color:#8bd9bd40}
+.board-token.ice{color:var(--ice);background:#92c8ff14;border-color:#92c8ff40}
+.board-token i{position:absolute;left:0;bottom:0;height:3px;background:var(--jade)}
+.board-token.enemy-avatar i{background:var(--coral)}
+@media(min-width:1101px){.combat-action-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}}
+@media(max-width:580px){.tactical-board{gap:3px;padding:5px}.board-cell{border-radius:5px}}

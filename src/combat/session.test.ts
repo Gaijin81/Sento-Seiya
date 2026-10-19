@@ -1,29 +1,38 @@
 import { describe, expect, it } from 'vitest'
-import { getActiveUnit, performAction } from './engine'
+import { chooseTacticalAction, getActiveUnit } from './engine'
 import { createDemoCombat, playActionAndResolveAi } from './session'
 
 describe('combat session used by the arena UI', () => {
-  it('starts with three allies and two enemies', () => {
+  it('starts with three allies and two enemies placed on the arena board', () => {
     const state = createDemoCombat()
     expect(state.units.filter((unit) => unit.team === 'player')).toHaveLength(3)
     expect(state.units.filter((unit) => unit.team === 'enemy')).toHaveLength(2)
+    expect(state.board).toMatchObject({ width: 7, height: 5 })
+    expect(state.units.every((unit) => unit.position)).toBe(true)
     expect(getActiveUnit(state)?.id).toBe('seiya')
   })
 
-  it('resolves enemy AI turns automatically after a player action', () => {
+  it('lets a knight move once, then end the turn, and resolves enemy turns automatically', () => {
     const state = createDemoCombat()
-    const first = playActionAndResolveAi(state, 'seiya', { type: 'attack', targetId: 'black-pega' })
-    expect(first.ok).toBe(true)
-    if (!first.ok) return
-    const second = playActionAndResolveAi(first.state, 'shiryu', { type: 'attack', targetId: 'black-pega' })
-    expect(second.ok).toBe(true)
-    if (!second.ok) return
-    const third = playActionAndResolveAi(second.state, 'hyoga', { type: 'attack', targetId: 'sanctuary-guard' })
-    expect(third.ok).toBe(true)
-    if (!third.ok) return
-    expect(third.state.log.some((entry) => entry.actorId === 'seiya')).toBe(true)
-    expect(third.state.log.some((entry) => entry.actorId === 'black-pega' || entry.actorId === 'sanctuary-guard')).toBe(true)
-    expect(getActiveUnit(third.state)?.team).toBe('player')
+    const moved = playActionAndResolveAi(state, 'seiya', { type: 'move', to: { x: 3, y: 2 } })
+    expect(moved.ok).toBe(true)
+    if (!moved.ok) return
+    expect(getActiveUnit(moved.state)?.id).toBe('seiya')
+    expect(moved.state.moved).toBe(true)
+    expect(playActionAndResolveAi(moved.state, 'seiya', { type: 'move', to: { x: 4, y: 2 } }).ok).toBe(false)
+    expect(playActionAndResolveAi(moved.state, 'seiya', { type: 'attack', targetId: 'black-pega' }).ok).toBe(false)
+
+    let current = moved.state
+    for (const id of ['seiya', 'shiryu', 'hyoga']) {
+      const result = playActionAndResolveAi(current, id, { type: 'wait' })
+      expect(result.ok).toBe(true)
+      if (!result.ok) return
+      current = result.state
+    }
+    expect(current.round).toBe(2)
+    expect(current.moved).toBe(false)
+    expect(current.log.some((entry) => entry.actorId === 'black-pega' && entry.action === 'move')).toBe(true)
+    expect(getActiveUnit(current)?.team).toBe('player')
   })
 
   it('rejects attempts to act out of turn without mutating combat state', () => {
@@ -33,25 +42,18 @@ describe('combat session used by the arena UI', () => {
     expect(result.state).toBe(state)
   })
 
-  it('allows the battle to progress through multiple turns deterministically', () => {
+  it('reaches a result when both sides follow the tactical policy', () => {
     let state = createDemoCombat()
-    for (let i = 0; i < 30 && state.status === 'ongoing'; i += 1) {
+    for (let i = 0; i < 200 && state.status === 'ongoing'; i += 1) {
       const active = getActiveUnit(state)
       if (!active) break
-      if (active.team === 'enemy') {
-        const enemyAction = active.technique && active.cosmos >= active.technique.cost
-          ? { type: 'technique' as const, targetId: 'seiya' }
-          : { type: 'attack' as const, targetId: 'seiya' }
-        const result = performAction(state, active.id, enemyAction)
-        if (result.ok) state = result.state
-      } else {
-        const target = state.units.find((unit) => unit.team === 'enemy' && unit.hp > 0)
-        if (!target) break
-        const result = playActionAndResolveAi(state, active.id, { type: 'attack', targetId: target.id })
-        if (result.ok) state = result.state
-      }
+      const action = chooseTacticalAction(state, active.id)
+      if (!action) break
+      const result = playActionAndResolveAi(state, active.id, action)
+      expect(result.ok).toBe(true)
+      if (result.ok) state = result.state
     }
-    expect(['ongoing', 'victory', 'defeat']).toContain(state.status)
-    expect(state.log.length).toBeGreaterThan(0)
+    expect(state.status).not.toBe('ongoing')
+    expect(state.log.some((entry) => entry.action === 'attack' || entry.action === 'technique')).toBe(true)
   })
 })

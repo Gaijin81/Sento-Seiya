@@ -109,7 +109,8 @@ describe('squad composition', () => {
     expect(allies.map((unit) => unit.id)).toEqual(['shiryu', 'seiya'])
     expect(allies[0]).toMatchObject({ maxHp: 56, attack: 10, defense: 6 })
     expect(combat.units.filter((unit) => unit.team === 'enemy')).toHaveLength(2)
-    expect(playActionAndResolveAi(combat, 'seiya', { type: 'attack', targetId: 'black-pega' }).ok).toBe(true)
+    expect(allies.map((unit) => unit.position)).toEqual([{ x: 0, y: 2 }, { x: 0, y: 1 }])
+    expect(playActionAndResolveAi(combat, 'seiya', { type: 'wait' }).ok).toBe(true)
   })
 
   it('rewards only the knights that fought, plus Cosmos shards', () => {
