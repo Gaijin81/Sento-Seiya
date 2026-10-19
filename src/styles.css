@@ -184,3 +184,16 @@ button.battle-unit.enemy:disabled{cursor:default}
 .forge-item p{margin:0 0 8px;color:var(--muted);font-size:11px;line-height:1.6}
 .gear-bonus{display:block;color:var(--jade);font-size:12px;margin-bottom:8px}
 .forge-item .secondary-button{width:100%;justify-content:center;margin-top:8px}
+.options-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.volume-row{display:grid;grid-template-columns:70px minmax(0,1fr) 48px;align-items:center;gap:10px;margin:12px 0;font-size:12px;color:#c6cbe0}
+.volume-row input{width:100%;accent-color:var(--gold)}
+.volume-row strong{text-align:right;color:var(--gold);font-size:11px}
+.pack-list{list-style:none;padding:0;margin:0 0 12px;display:grid;gap:8px}
+.pack-list li{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:9px;color:var(--gold)}
+.pack-list li>span{flex:1;display:grid;gap:3px;color:#eef0f7;font-size:12px}
+.pack-list small{color:var(--muted);font-size:10px}
+.file-button{position:relative;overflow:hidden;cursor:pointer}
+.file-button input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.pack-errors{margin:12px 0 0;padding:10px 10px 10px 26px;border:1px solid #ff9b8f55;border-radius:9px;color:#ffb3aa;font-size:11px;line-height:1.6}
+.sound-toggle{margin-right:6px}
+@media(max-width:900px){.options-grid{grid-template-columns:1fr}}

@@ -20,10 +20,21 @@ export const EQUIPMENT_CATALOG: EquipmentItem[] = [
   { id: 'sandales-ailees', name: 'Sandales ailées', slot: 'charm', cost: 35, description: 'Légères comme le vent du Sanctuaire.', bonus: { move: 1, speed: 1 } },
 ]
 
+let extraItems: EquipmentItem[] = []
+
+/** Items added by installed content packs (DLC). */
+export function setExtraItems(items: EquipmentItem[]): void {
+  extraItems = [...items]
+}
+
+export function allItems(): EquipmentItem[] {
+  return [...EQUIPMENT_CATALOG, ...extraItems]
+}
+
 const BONUS_LABELS: [keyof ItemBonus, string][] = [['hp', 'PV'], ['attack', 'ATQ'], ['defense', 'DÉF'], ['speed', 'VIT'], ['maxCosmos', 'Cosmos max'], ['move', 'déplacement'], ['techniqueRange', 'portée de technique']]
 
 export function getItem(id: string): EquipmentItem | undefined {
-  return EQUIPMENT_CATALOG.find((item) => item.id === id)
+  return allItems().find((item) => item.id === id)
 }
 
 export function bonusLabel(bonus: ItemBonus): string {

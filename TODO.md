@@ -104,10 +104,11 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 
 ## Musique et contenus additionnels (DLC) — `feature/audio-dlc`
 
-- [ ] Lecteur de musique d'ambiance et d'effets sonores, avec réglage du volume et coupure (mobile compris).
+- [x] Musique d'ambiance (menus, campagne, combat) et effets sonores originaux générés par le navigateur, volume musique/effets et coupure sauvegardés (mobile compris).
 - [ ] Musiques et sons fournis par l'auteur (fichiers libres de droits ou sous licence).
-- [ ] Format de pack de contenu (DLC) : chapitres, chevaliers et musiques chargés depuis un manifeste validé.
-- [ ] Tests du chargement et de la validation des packs.
+- [x] Format de pack de contenu (DLC) v1 : objets de forge et musiques, chargés depuis un manifeste JSON validé ; page Options pour installer, importer et désinstaller.
+- [ ] Packs v2 : chapitres de campagne et chevaliers supplémentaires.
+- [x] Tests du chargement, de la validation, de l'installation et de la désinstallation des packs, et des réglages audio.
 
 ## Progression et collection
 

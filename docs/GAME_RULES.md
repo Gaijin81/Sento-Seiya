@@ -136,6 +136,20 @@ L'arène de démonstration oppose l'escouade du joueur (1 à 3 chevaliers) à de
 - Les parties locales (PvP / coop) n'utilisent pas l'équipement, pour rester équitables.
 - Sauvegarde v3 : les sauvegardes v1 et v2 sont migrées automatiquement, sans poussières ni objets.
 
+## 6 octies. Audio et packs de contenu (DLC)
+
+- Trois ambiances musicales originales, générées par le navigateur : menus, campagne, combat (combats d'arène, de campagne et parties locales). Effets sonores pour les choix, attaques, techniques, victoires et défaites.
+- Page Options : volume de la musique et des effets (0 à 100 %), coupure du son (aussi dans la barre du haut). Les réglages sont sauvegardés (`sento-seiya-audio`). Sur mobile, le son démarre au premier toucher.
+- Un pack de contenu est un fichier JSON (50 Ko max), sans code :
+  ```json
+  { "format": 1, "id": "mon-pack", "name": "Mon pack", "version": "1.0.0", "author": "…", "description": "…",
+    "items": [{ "id": "mon-objet", "name": "…", "slot": "relic", "cost": 30, "description": "…", "bonus": { "attack": 1 } }],
+    "music": { "battle": "https://exemple.com/combat.ogg" } }
+  ```
+- Règles de validation : identifiants en minuscules/chiffres/tirets (3–40), 12 objets max, emplacement `relic` ou `charm`, coût 1–999, bonus entiers (PV ≤ 20, ATQ/DÉF/VIT ≤ 3, Cosmos max ≤ 2, déplacement et portée de technique ≤ 1), identifiants d'objets uniques (jeu de base et autres packs), musiques `menu`/`campaign`/`battle` en `https://` ou `/chemin` vers mp3, ogg, wav ou m4a.
+- Installer un pack de même identifiant le met à jour. Désinstaller un pack retire ses objets de l'inventaire et des chevaliers. Les packs installés sont sauvegardés (`sento-seiya-dlc`).
+- Les musiques et sons de la licence originale ne sont pas fournis : seuls des fichiers libres de droits ou sous licence peuvent être ajoutés par pack.
+
 ## 7. Modes prévus
 
 - **PvE** : le joueur affronte des unités contrôlées par l'IA.
