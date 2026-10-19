@@ -136,7 +136,8 @@ export function performAction(state: CombatState, actorId: string, action: Comba
       const currentTarget = next.units.find((unit) => unit.id === target.id)!
       next = damageTarget(next, paidActor, currentTarget, actor.attack + technique.power, action)
       const lastLog = next.log[next.log.length - 1]
-      const dealtDamage = target.hp - (next.units.find((unit) => unit.id === target.id)?.hp ?? target.hp)\n      next = { ...next, log: [...next.log.slice(0, -1), { ...lastLog, message: `${actor.name} utilise ${technique.name} et inflige ${dealtDamage} dégâts à ${target.name}.` }] }
+      const dealtDamage = target.hp - (next.units.find((unit) => unit.id === target.id)?.hp ?? target.hp)
+      next = { ...next, log: [...next.log.slice(0, -1), { ...lastLog, message: `${actor.name} utilise ${technique.name} et inflige ${dealtDamage} dégâts à ${target.name}.` }] }
     }
   }
 
