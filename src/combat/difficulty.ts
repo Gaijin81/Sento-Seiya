@@ -21,6 +21,34 @@ export function applyDifficulty(enemies: UnitSetup[], difficulty: Difficulty): U
   })
 }
 
+export const ADAPTIVE_KEY = 'sento-seiya-adaptive'
+export const MAX_ADAPTIVE_GAP = 5
+
+/** Levels by which the squad outgrows the encounter (0 when it is at or below the expected level). */
+export function adaptiveGap(squadLevel: number, encounterLevel = 1): number {
+  return Math.min(MAX_ADAPTIVE_GAP, Math.max(0, Math.floor(squadLevel) - encounterLevel))
+}
+
+/** Progressive difficulty: per level of gap, enemies gain +8 % PV, +1 ATQ and +1 DÉF every 2 levels. */
+export function adaptToSquad(enemies: UnitSetup[], squadLevel: number, encounterLevel = 1): UnitSetup[] {
+  const gap = adaptiveGap(squadLevel, encounterLevel)
+  if (gap === 0) return enemies
+  const factor = 1 + 0.08 * gap
+  return enemies.map((unit) => ({ ...unit, maxHp: Math.round(unit.maxHp * factor), hp: Math.round(unit.hp * factor), attack: unit.attack + gap, defense: unit.defense + Math.floor(gap / 2) }))
+}
+
+export function loadAdaptive(storage: StorageLike): boolean {
+  try {
+    return storage.getItem(ADAPTIVE_KEY) !== 'off'
+  } catch {
+    return true
+  }
+}
+
+export function saveAdaptive(storage: StorageLike, enabled: boolean): void {
+  storage.setItem(ADAPTIVE_KEY, enabled ? 'on' : 'off')
+}
+
 export function parseDifficulty(value: unknown): Difficulty {
   return DIFFICULTIES.includes(value as Difficulty) ? value as Difficulty : 'normal'
 }
