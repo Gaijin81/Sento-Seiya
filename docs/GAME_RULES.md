@@ -182,6 +182,13 @@ L'arène de démonstration oppose l'escouade du joueur (1 à 3 chevaliers) à de
 - Installer un pack de même identifiant le met à jour. Désinstaller un pack retire ses objets de l'inventaire et des chevaliers. Les packs installés sont sauvegardés (`sento-seiya-dlc`).
 - Les musiques et sons de la licence originale ne sont pas fournis : seuls des fichiers libres de droits ou sous licence peuvent être ajoutés par pack.
 
+## 6 nonies. Installation et hors ligne (PWA)
+
+- `public/manifest.webmanifest` rend le jeu installable (écran d'accueil du smartphone, application PC) en mode plein écran.
+- `public/sw.js` n'est enregistré qu'en production : il met en cache l'interface au premier chargement, sert la page en « réseau d'abord » (mise à jour rapide) et les fichiers en « cache puis mise à jour ».
+- Après une première visite, le jeu se lance sans connexion ; les sauvegardes restent locales (`localStorage`).
+- Changer `CACHE` dans `sw.js` force le renouvellement du cache.
+
 ## 7. Modes prévus
 
 - **PvE** : le joueur affronte des unités contrôlées par l'IA.
