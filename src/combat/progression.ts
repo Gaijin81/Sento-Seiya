@@ -1,6 +1,6 @@
 import type { CombatState } from './types'
 import { getKnightDefinition, STARTER_KNIGHT_IDS } from './knights'
-import { normalizeEquipment, normalizeInventory, type Loadout } from './equipment'
+import { normalizeEquipment, normalizeInventory, normalizeUpgrades, type Loadout } from './equipment'
 
 export const SAVE_KEY = 'sento-seiya-progress'
 export const SAVE_VERSION = 3
@@ -28,6 +28,8 @@ export type ProgressionState = {
   stardust: number
   inventory: string[]
   equipment: Record<string, Loadout>
+  /** Forge level per item id (1–3); missing means level 0. */
+  upgrades?: Record<string, number>
 }
 
 export type StorageLike = Pick<Storage, 'getItem' | 'setItem'>
@@ -138,6 +140,7 @@ export function parseProgression(value: unknown): ProgressionState | null {
       stardust: current ? candidate.stardust as number : 0,
       inventory,
       equipment: current ? normalizeEquipment(candidate.equipment, knights, inventory) : {},
+      ...(current && candidate.upgrades ? { upgrades: normalizeUpgrades(candidate.upgrades, inventory) } : {}),
     }
   }
 
