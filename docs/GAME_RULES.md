@@ -206,6 +206,14 @@ L'arène de démonstration oppose l'escouade du joueur (1 à 3 chevaliers) à de
 - Lien « Aller au contenu » au premier Tab, page active marquée `aria-current`, Échap ferme le menu mobile.
 - Les textes secondaires respectent un contraste d'au moins 4,5:1 ; `prefers-reduced-motion` coupe les animations.
 
+## 6 undecies. Jeu en ligne
+
+- Le PvP et la coop en ligne reprennent les règles des parties locales (niveau 3 pour tous, même plateau, même IA en coop) mais chaque joueur joue sur son propre appareil.
+- Un serveur Node.js (`npm run server`) fait autorité : il crée les équipes à partir des identifiants de chevaliers, vérifie que l'unité appartient au joueur et que c'est son tour, puis applique l'action avec le moteur de combat partagé. Une action refusée ne modifie rien.
+- Salons : code de 5 caractères à partager, ou recherche rapide qui associe deux joueurs du même mode. Abandonner ferme le salon pour les deux joueurs ; un salon inactif 30 minutes est supprimé.
+- Reconnexion : un jeton gardé dans le navigateur permet de reprendre la partie après une coupure ou un rechargement.
+- Les parties en ligne ne donnent ni XP ni ressources. Détails techniques et déploiement : `docs/ONLINE.md`.
+
 ## 7. Modes prévus
 
 - **PvE** : le joueur affronte des unités contrôlées par l'IA.

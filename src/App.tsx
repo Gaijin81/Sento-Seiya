@@ -12,6 +12,7 @@ import { applyEquipment, availableCount, forgeLevel, MAX_FORGE_LEVEL, requiredCh
 import CampaignBoard from './campaign/CampaignBoard'
 import CodexPage from './codex/CodexPage'
 import LocalVersus from './versus/LocalVersus'
+import OnlineVersus, { ONLINE_SESSION_KEY } from './online/OnlineVersus'
 import type { LocalMode } from './versus/match'
 import { CHAPTERS, getChapter, isChapterUnlocked } from './campaign/chapters'
 import { ENCOUNTERS } from './campaign/encounters'
@@ -19,7 +20,7 @@ import { chooseOption, createCampaign, loadCampaign, pendingEncounter, resolveEn
 import type { CampaignState } from './campaign/types'
 import {
   Swords, Shield, Sparkles, Users, Map, ScrollText, Trophy,
-  ChevronRight, Flame, Star, CircleHelp, Menu, X, Heart, Zap,
+  ChevronRight, Globe, Flame, Star, CircleHelp, Menu, X, Heart, Zap,
   Hammer,
   Package,
   Settings,
@@ -78,7 +79,7 @@ const recruitLabels = {
   owned: 'Recruté',
 } as const
 
-type Section = 'Campagne' | 'Équipe' | 'Arènes' | 'Combat' | 'Codex' | 'Partie locale' | 'Options'
+type Section = 'Campagne' | 'Équipe' | 'Arènes' | 'Combat' | 'Codex' | 'Partie locale' | 'En ligne' | 'Options'
 
 const BOOT_PACKS: ContentPack[] = (() => {
   if (typeof window === 'undefined') return []
@@ -88,7 +89,7 @@ const BOOT_PACKS: ContentPack[] = (() => {
 })()
 
 export default function App() {
-  const [activeSection, setActiveSection] = useState<Section>('Campagne')
+  const [activeSection, setActiveSection] = useState<Section>(() => (localStorage.getItem(ONLINE_SESSION_KEY) ? 'En ligne' : 'Campagne'))
   const [selectedCampaign, setSelectedCampaign] = useState(0)
   const [showRoster, setShowRoster] = useState(false)
   const [mobileMenu, setMobileMenu] = useState(false)
@@ -137,7 +138,7 @@ export default function App() {
     setNotice(`Difficulté : ${DIFFICULTY_INFO[next].label}.`)
   }
 
-  const theme: Theme = activeSection === 'Combat' || activeSection === 'Partie locale' || (activeSection === 'Campagne' && campaignFight) ? 'battle' : activeSection === 'Campagne' ? 'campaign' : 'menu'
+  const theme: Theme = activeSection === 'Combat' || activeSection === 'Partie locale' || activeSection === 'En ligne' || (activeSection === 'Campagne' && campaignFight) ? 'battle' : activeSection === 'Campagne' ? 'campaign' : 'menu'
   useEffect(() => { audio.playTheme(theme) }, [theme])
   useEffect(() => {
     audio.configure(audioSettings)
@@ -170,6 +171,7 @@ export default function App() {
     try { installRawPack(JSON.parse(await file.text())) } catch { setPackErrors(['Le fichier n’est pas un JSON valide.']) }
   }
   const openLocal = (mode: LocalMode) => { setLocalMode(mode); setActiveSection('Partie locale') }
+  const openOnline = (mode: LocalMode) => { setLocalMode(mode); setActiveSection('En ligne') }
 
   const selectChapter = (id: string) => {
     const next = getChapter(id)
@@ -456,9 +458,10 @@ export default function App() {
           </section>
         )}
 
-        {activeSection === 'Arènes' && <section className="page-section"><div className="eyebrow">COMBAT · HONNEUR · STRATÉGIE</div><h1>Les arènes</h1><p className="page-intro">Prépare-toi aux combats tactiques, aux défis contre l’IA et aux affrontements entre joueurs.</p><div className="arena-grid"><article className="arena-card"><div className="arena-icon"><Swords size={28} /></div><span className="campaign-subtitle">SOLO · PVE</span><h2>Épreuve du Sanctuaire</h2><p>Affronte une série d’adversaires contrôlés par l’IA et teste ta stratégie.</p><button className="secondary-button arena-launch" onClick={() => setActiveSection('Combat')}><Swords size={15} /> Lancer un combat <ChevronRight size={15} /></button></article><article className="arena-card"><div className="arena-icon violet-icon"><Shield size={28} /></div><span className="campaign-subtitle">DUEL · PVP</span><h2>Défi des chevaliers</h2><p>Compare tes équipes et mesure ta maîtrise du Cosmos contre d’autres joueurs.</p><button className="secondary-button arena-launch" onClick={() => openLocal('pvp')}><Swords size={15} /> Duel sur le même appareil <ChevronRight size={15} /></button></article><article className="arena-card"><div className="arena-icon jade-icon"><Users size={28} /></div><span className="campaign-subtitle">COOPÉRATION</span><h2>Alliance des héros</h2><p>Unis tes forces avec d’autres joueurs pour vaincre des boss redoutables.</p><button className="secondary-button arena-launch" onClick={() => openLocal('coop')}><Users size={15} /> Coop sur le même appareil <ChevronRight size={15} /></button></article></div></section>}
+        {activeSection === 'Arènes' && <section className="page-section"><div className="eyebrow">COMBAT · HONNEUR · STRATÉGIE</div><h1>Les arènes</h1><p className="page-intro">Prépare-toi aux combats tactiques, aux défis contre l’IA et aux affrontements entre joueurs.</p><div className="arena-grid"><article className="arena-card"><div className="arena-icon"><Swords size={28} /></div><span className="campaign-subtitle">SOLO · PVE</span><h2>Épreuve du Sanctuaire</h2><p>Affronte une série d’adversaires contrôlés par l’IA et teste ta stratégie.</p><button className="secondary-button arena-launch" onClick={() => setActiveSection('Combat')}><Swords size={15} /> Lancer un combat <ChevronRight size={15} /></button></article><article className="arena-card"><div className="arena-icon violet-icon"><Shield size={28} /></div><span className="campaign-subtitle">DUEL · PVP</span><h2>Défi des chevaliers</h2><p>Compare tes équipes et mesure ta maîtrise du Cosmos contre d’autres joueurs.</p><button className="secondary-button arena-launch" onClick={() => openLocal('pvp')}><Swords size={15} /> Duel sur le même appareil <ChevronRight size={15} /></button><button className="secondary-button arena-launch" onClick={() => openOnline('pvp')}><Globe size={15} /> Duel en ligne <ChevronRight size={15} /></button></article><article className="arena-card"><div className="arena-icon jade-icon"><Users size={28} /></div><span className="campaign-subtitle">COOPÉRATION</span><h2>Alliance des héros</h2><p>Unis tes forces avec d’autres joueurs pour vaincre des boss redoutables.</p><button className="secondary-button arena-launch" onClick={() => openLocal('coop')}><Users size={15} /> Coop sur le même appareil <ChevronRight size={15} /></button><button className="secondary-button arena-launch" onClick={() => openOnline('coop')}><Globe size={15} /> Coop en ligne <ChevronRight size={15} /></button></article></div></section>}
 
         {activeSection === 'Partie locale' && <LocalVersus key={localMode} initialMode={localMode} onBack={() => setActiveSection('Arènes')} />}
+        {activeSection === 'En ligne' && <OnlineVersus key={localMode} initialMode={localMode} onBack={() => setActiveSection('Arènes')} />}
         {activeSection === 'Options' && (
           <section className="page-section">
             <div className="eyebrow">SON · CONTENUS ADDITIONNELS</div>

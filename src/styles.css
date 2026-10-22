@@ -246,3 +246,7 @@ main:focus{outline:none}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 .forge-level{display:inline-block;margin-top:14px;font-size:10px;color:var(--gold)}
 .adaptive-row{display:flex;gap:10px;align-items:flex-start;margin:4px 0 10px;cursor:pointer}.adaptive-row input{margin-top:3px;accent-color:var(--gold)}.adaptive-row span{display:grid;gap:3px}.adaptive-row small{color:var(--muted);font-size:10px}
+.online-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #8bd9bd55;border-radius:999px;color:#8bd9bd;font-size:11px;white-space:nowrap}.online-pill.offline{border-color:#ff8f9a55;color:#ff8f9a}
+.online-setup{display:grid;gap:12px}.online-field{display:grid;gap:6px;font-size:11px;color:var(--muted);flex:1;min-width:0}.online-field input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:#171d2b;color:#eef0f7;font:500 13px Manrope,sans-serif}
+.online-join{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}.online-join .online-field{flex:1 1 160px}.online-setup code{color:var(--gold)}
+.room-code{color:var(--gold);letter-spacing:4px;font-family:monospace}.online-warning{display:flex;align-items:center;gap:6px;color:#ff8f9a}

@@ -97,7 +97,7 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 - [x] Niveau identique pour tous en partie locale (niveau 3) ; la progression n'est pas modifiée.
 - [x] Composant de plateau partagé entre l'arène, la campagne et les parties locales.
 - [x] Tests des modes, des contrôleurs, des actions hors tour, du passage de main et des conditions de victoire.
-- [ ] Coop et PvP en ligne (voir « Modes de jeu »).
+- [x] Coop et PvP en ligne (voir « Modes de jeu » et `feature/online`).
 
 ## Équipement et ressources — `feature/equipment`
 
@@ -142,11 +142,14 @@ Cette liste est la source de vérité du projet. Cocher une tâche uniquement ap
 ## Modes de jeu
 
 - [x] PvE avec boss (chapitre 1) et 3 niveaux de difficulté (Facile, Normal, Difficile) appliqués aux adversaires de l'IA, réglables dans Options.
-- [ ] Difficulté progressive automatique selon le niveau de l'escouade.
-- [ ] Coop en ligne et synchronisation d'état.
-- [ ] PvP en ligne avec validation serveur des actions.
-- [ ] Matchmaking, salons, invitations et reconnexion.
-- [ ] Anti-triche et journal de combat serveur.
+- [x] Difficulté progressive automatique selon le niveau de l'escouade.
+- [x] Coop en ligne et synchronisation d'état (serveur Node.js/WebSocket, `npm run server`).
+- [x] PvP en ligne avec validation serveur des actions (moteur de combat partagé client/serveur).
+- [x] Salons avec code, recherche rapide et reconnexion automatique.
+- [x] Anti-triche de base : messages validés, unité et tour vérifiés par le serveur, limite de débit ; journal de combat tenu par le serveur.
+- [ ] Déploiement du serveur sur un cloud gratuit (guide prêt : `docs/ONLINE.md`, `render.yaml`).
+- [ ] Comptes joueurs et sauvegarde en ligne (nécessite une base de données).
+- [ ] Classement en ligne.
 
 ## Sécurité des dépendances — `chore/deps-security`
 
