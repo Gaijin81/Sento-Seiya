@@ -70,7 +70,7 @@ describe('game server', () => {
     expect(await guest.next('room')).toMatchObject({ room: { opponentConnected: true } })
 
     back.send({ type: 'leave' })
-    expect(await guest.next('closed')).toMatchObject({ reason: 'Ton adversaire a quitté la partie.' })
+    expect(await guest.next('closed')).toMatchObject({ reason: 'L’autre joueur a quitté la partie.' })
     ;[back, guest].forEach((client) => client.socket.close())
   })
 

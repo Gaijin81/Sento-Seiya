@@ -28,7 +28,7 @@ function readSession(): StoredSession | null {
   }
 }
 
-const sideLabel = (side: Side | 'ai' | undefined, mine: Side) => (side === 'ai' || !side ? 'IA' : side === mine ? 'Toi' : 'Adversaire')
+const sideLabel = (side: Side | 'ai' | undefined, mine: Side, mode: LocalMode) => (side === 'ai' || !side ? 'IA' : side === mine ? 'Toi' : mode === 'coop' ? 'Allié' : 'Adversaire')
 
 export default function OnlineVersus({ initialMode = 'pvp', onBack }: Props) {
   const [mode, setMode] = useState<LocalMode>(initialMode)
@@ -218,15 +218,15 @@ export default function OnlineVersus({ initialMode = 'pvp', onBack }: Props) {
     if (active && !combat.moved && reachableCells(combat, active.id).some((entry) => samePosition(entry, cell))) act({ type: 'move', to: cell })
   }
 
-  const turnLabel = finished ? (won ? 'Victoire !' : 'Défaite…') : active ? `${active.name} — ${myTurn ? 'à toi de jouer' : controller === 'ai' ? 'l’IA joue' : 'tour de l’adversaire'}` : ''
+  const turnLabel = finished ? (won ? 'Victoire !' : 'Défaite…') : active ? `${active.name} — ${myTurn ? 'à toi de jouer' : controller === 'ai' ? 'l’IA joue' : room.mode === 'coop' ? 'tour de ton allié' : 'tour de l’adversaire'}` : ''
 
   return (
     <section className="page-section combat-page" aria-label="Partie en ligne en cours">
       <div className="eyebrow">{room.mode === 'pvp' ? 'JOUEUR CONTRE JOUEUR' : 'COOPÉRATION'} · EN LIGNE · SALON {room.code}</div>
       <div className="combat-title-row"><div><h1>{room.mode === 'pvp' ? 'Duel en ligne' : 'Alliance en ligne'}</h1></div><div className="round-pill">TOUR <strong>{combat.round}</strong></div>{connection}</div>
       <div className="combat-status" role="status"><Sparkles size={17} /><span>{turnLabel}</span><span className={'status-tag' + (finished ? (won ? ' victory' : ' defeat') : '')}>{finished ? 'TERMINÉ' : myTurn ? 'TON TOUR' : 'ATTENTE'}</span></div>
-      {!room.opponentConnected && !finished && <p className="control-hint online-warning"><WifiOff size={14} /> L’autre joueur est déconnecté. La partie reprendra à son retour.</p>}
-      <TacticalBoard combat={combat} canAct={canAct} selectedTargetId={target?.id} eyebrow={active ? sideLabel(match.controllers[active.id], room.side).toUpperCase() + ' · ' + active.name.toUpperCase() : 'PLATEAU'} onCellClick={onCellClick} />
+      {!room.opponentConnected && !finished && <p className="control-hint online-warning"><WifiOff size={14} /> {room.mode === 'coop' ? 'Ton allié' : 'L’autre joueur'} est déconnecté. La partie reprendra à son retour.</p>}
+      <TacticalBoard combat={combat} canAct={canAct} selectedTargetId={target?.id} eyebrow={active ? sideLabel(match.controllers[active.id], room.side, room.mode).toUpperCase() + ' · ' + active.name.toUpperCase() : 'PLATEAU'} onCellClick={onCellClick} />
       <div className="combat-controls panel">
         {finished ? (
           <div className="victory-reward" role="status"><Trophy size={16} /> {won ? 'Victoire en ligne !' : 'Défaite en ligne.'} Les parties en ligne ne modifient pas ta progression.</div>
@@ -246,7 +246,7 @@ export default function OnlineVersus({ initialMode = 'pvp', onBack }: Props) {
         {combat.units.map((unit) => (
           <div key={unit.id} className={'versus-unit' + (unit.hp <= 0 ? ' unit-defeated' : '') + (unit.id === active?.id ? ' unit-active' : '')}>
             <span className={'battle-avatar ' + (unit.team === 'player' ? '' : 'enemy-avatar')}>{unitGlyph(unit)}</span>
-            <span><strong>{unit.name}</strong><small>{sideLabel(match.controllers[unit.id], room.side)} · PV {Math.max(0, unit.hp)}/{unit.maxHp} · Cosmos {unit.cosmos}/{unit.maxCosmos}</small></span>
+            <span><strong>{unit.name}</strong><small>{sideLabel(match.controllers[unit.id], room.side, room.mode)} · PV {Math.max(0, unit.hp)}/{unit.maxHp} · Cosmos {unit.cosmos}/{unit.maxCosmos}</small></span>
           </div>
         ))}
       </div>

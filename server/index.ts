@@ -74,7 +74,7 @@ export function createGameServer(manager = new RoomManager()): GameServer {
         case 'leave': {
           if (!token) return
           const room = manager.leave(token)
-          if (room) closeRoom(room, 'Ton adversaire a quitté la partie.', token)
+          if (room) closeRoom(room, 'L’autre joueur a quitté la partie.', token)
           sockets.delete(token)
           token = null
         }
